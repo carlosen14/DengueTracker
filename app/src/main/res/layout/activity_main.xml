@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.netsdo.swipe4d.VerticalPager xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_main_vertical_pager"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <fragment
+        android:id="@+id/main_mos_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.netsdo.denguetracker.MosCompositeFragment" />
+
+    <fragment
+        android:id="@+id/main_temp_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.netsdo.denguetracker.TempCompositeFragment" />
+
+</com.netsdo.swipe4d.VerticalPager>
