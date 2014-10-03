@@ -1,5 +1,8 @@
 package com.netsdo.denguetracker;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,51 +23,71 @@ public class MosBiteFragment extends Fragment  {
 
     private BestLocationProvider mBestLocationProvider;
     private BestLocationListener mBestLocationListener;
+    private MainActivity parentActivity;
+    private InfoHandler mInfo;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
 		View fragmentView = inflater.inflate(R.layout.fragment_mos_bite, container, false);
+        parentActivity = (MainActivity) getActivity();
+        mInfo = parentActivity.mInfo;
 
         View.OnClickListener buttonListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String showText;
+                String biteOn;
                 switch (v.getId()) {
                     case R.id.hbutton:
-                        showText = "Head Clicked.";
+                        biteOn = "Head";
                         break;
                     case R.id.bbutton:
-                        showText = "Body Clicked.";
+                        biteOn = "Body";
                         break;
                     case R.id.rabutton:
-                        showText = "Right Arm Clicked.";
+                        biteOn = "RightArm";
                         break;
                     case R.id.rhbutton:
-                        showText = "Right Hand Clicked.";
+                        biteOn = "RightHand";
+                        mInfo.deleteAllInfo();
                         break;
                     case R.id.rlbutton:
-                        showText = "Right Leg Clicked.";
+                        biteOn = "RightLeg";
                         break;
                     case R.id.rfbutton:
-                        showText = "Right Foot Clicked.";
+                        biteOn = "RightFoot";
                         break;
                     case R.id.labutton:
-                        showText = "Left Arm Clicked.";
+                        biteOn = "LeftArm";
                         break;
                     case R.id.lhbutton:
-                        showText = "Left Hand Clicked.";
+                        biteOn = "LeftHand";
+                        Log.d(TAG, mInfo.selectAllInfo());
                         break;
                     case R.id.llbutton:
-                        showText = "Left Leg Clicked.";
+                        biteOn = "LeftLeg";
                         break;
                     case R.id.lfbutton:
-                        showText = "Left Foot Clicked.";
+                        biteOn = "LeftFoot";
                         break;
                     default:
-                        showText = "Unknown Clicked.";
+                        biteOn = "Unknown";
                 }
-//                 mTvLog.setText("\n\n" + new Date().toLocaleString() + "\nLOCATION UPDATE: isFresh:" + String.valueOf(isFresh) + "\n" + mBestLocationProvider.locationToString(location) + mTvLog.getText());
-                Toast.makeText(v.getContext(), showText + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(v.getContext(), showText + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), Toast.LENGTH_SHORT).show();
+                Log.i(TAG, biteOn + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
+                boolean mosBite = mInfo.insertInfo(new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()), mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), "MosBite", biteOn);
+
+                Integer norec = mInfo.openSelectInfo(null, null, null, null, null);
+                if (norec != 0) {
+                    String jsonInfo = mInfo.selectNextInfo();
+                    while (jsonInfo != null) {
+//                        Log.i(TAG, "rowid:" + rowid + " iwhen: " + iwhen + " iwhere: " + iwhere + " ihow: " + ihow + " iwhat: " + iwhat);
+                        Log.d(TAG, jsonInfo);
+                        jsonInfo = mInfo.selectNextInfo();
+                    }
+
+                } else {
+                    Log.i(TAG, "no record of Info found.");
+                }
             }
         };
 

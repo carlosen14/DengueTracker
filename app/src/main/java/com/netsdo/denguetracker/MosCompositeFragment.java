@@ -15,12 +15,11 @@ import com.netsdo.swipe4d.PageChangedEvent;
 import java.util.ArrayList;
 
 public class MosCompositeFragment extends Fragment {
+// todo, to implement fragment pause/resume method
+// refer to http://stackoverflow.com/questions/22184406/run-code-when-user-swipes-out-of-viewpager-fragment
 
-	// -----------------------------------------------------------------------
-	//
-	// Fields
-	//
-	// -----------------------------------------------------------------------
+    private static String TAG = "MosCompositeFragment";
+
 	private ViewPager mHorizontalPager;
 	private int mCentralPageIndex = 0;
 	private OnPageChangeListener mPagerChangeListener = new OnPageChangeListener() {
@@ -39,11 +38,6 @@ public class MosCompositeFragment extends Fragment {
 		}
 	};
 
-	// -----------------------------------------------------------------------
-	//
-	// Methods
-	//
-	// -----------------------------------------------------------------------
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View fragmentView = inflater.inflate(R.layout.fragment_composite_mos, container, false);

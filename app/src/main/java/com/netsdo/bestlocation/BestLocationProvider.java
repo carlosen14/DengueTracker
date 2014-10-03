@@ -1,5 +1,6 @@
 package com.netsdo.bestlocation;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.content.Context;
@@ -11,6 +12,10 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.netsdo.bestlocation.BestLocationListener;
+import com.netsdo.denguetracker.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class BestLocationProvider {
 
@@ -212,30 +217,27 @@ public class BestLocationProvider {
 	}
 
     public Location getLocation() {
+        //todo, to handle null location case which may cause app crash.
         return mLocation;
     }
 
 	public String locationToString(Location l) {
-		StringBuffer sb = new StringBuffer();
+        JSONObject mObj = new JSONObject();
 
-		sb.append("PROVIDER: ");
-		sb.append(l.getProvider());
-		sb.append(" - LAT: ");
-		sb.append(l.getLatitude());
-		sb.append(" - LON: ");
-		sb.append(l.getLongitude());
-		sb.append(" - BEARING: ");
-		sb.append(l.getBearing());
-		sb.append(" - ALT: ");
-		sb.append(l.getAltitude());
-		sb.append(" - SPEED: ");
-		sb.append(l.getSpeed());
-		sb.append(" - TIME: ");
-		sb.append(l.getTime());
-		sb.append(" - ACC: ");
-		sb.append(l.getAccuracy());
-
-		return sb.toString();
+        try {
+            mObj.put("latitude", l.getLatitude());
+            mObj.put("longitude", l.getLongitude());
+            mObj.put("altitude", l.getAltitude());
+            mObj.put("speed", l.getSpeed());
+            mObj.put("bearing", l.getBearing());
+            mObj.put("accuracy", l.getAccuracy());
+            mObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(l.getTime()));
+            mObj.put("provider", l.getProvider());
+            return mObj.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
 	}
 
 

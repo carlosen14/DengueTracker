@@ -5,3 +5,4 @@
 //todo library compilation problem
 :app:compileDebugSources : ok to load module
 :app:assembleDebug       : failed to load module
+

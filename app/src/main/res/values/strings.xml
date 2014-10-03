@@ -2,5 +2,6 @@
 <resources>
 
     <string name="app_name">Dengue Tracker</string>
+    <string name="iso6301">yyyy-MM-dd\'T\'HH:mm:ss.SSSZ</string>
 
 </resources>
