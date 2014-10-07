@@ -3,6 +3,7 @@ package com.netsdo.denguetracker;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,7 +18,7 @@ import com.netsdo.bestlocation.BestLocationListener;
 import com.netsdo.bestlocation.BestLocationProvider;
 import com.netsdo.bestlocation.BestLocationProvider.LocationType;
 
-public class MosBiteFragment extends Fragment  {
+public class MosBiteFragment extends Fragment {
 
     private static String TAG = "MosBiteFragment";
 
@@ -26,9 +27,9 @@ public class MosBiteFragment extends Fragment  {
     private MainActivity parentActivity;
     private InfoHandler mInfo;
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
-		View fragmentView = inflater.inflate(R.layout.fragment_mos_bite, container, false);
+    @Override
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
+        View fragmentView = inflater.inflate(R.layout.fragment_mos_bite, container, false);
         parentActivity = (MainActivity) getActivity();
         mInfo = parentActivity.mInfo;
 
@@ -112,8 +113,8 @@ public class MosBiteFragment extends Fragment  {
         llbutton.setOnClickListener(buttonListener);
         lfbutton.setOnClickListener(buttonListener);
 
-		return fragmentView;
-	}
+        return fragmentView;
+    }
 
     @Override
     public void onResume() {
@@ -122,6 +123,7 @@ public class MosBiteFragment extends Fragment  {
 
         super.onResume();
     }
+
     @Override
     public void onPause() {
         initLocation();

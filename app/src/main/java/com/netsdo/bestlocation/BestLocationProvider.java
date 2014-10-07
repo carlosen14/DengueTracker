@@ -233,6 +233,8 @@ public class BestLocationProvider {
             mObj.put("accuracy", l.getAccuracy());
             mObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(l.getTime()));
             mObj.put("provider", l.getProvider());
+//            mObj.put("elapsedrealtimenanos", l.getElapsedRealtimeNanos()); for API 17 only.
+            mObj.put("extras", l.getExtras());
             return mObj.toString();
         } catch (JSONException e) {
             e.printStackTrace();
