@@ -17,10 +17,15 @@ import android.widget.Toast;
 import com.netsdo.bestlocation.BestLocationListener;
 import com.netsdo.bestlocation.BestLocationProvider;
 import com.netsdo.bestlocation.BestLocationProvider.LocationType;
+import com.netsdo.swipe4d.EventBus;
+import com.netsdo.swipe4d.PageChangedEvent;
+import com.netsdo.swipe4d.VerticalPageInVisibleEvent;
+import com.netsdo.swipe4d.VerticalPageVisibleEvent;
+import com.squareup.otto.Subscribe;
 
 public class MosBiteFragment extends Fragment {
-
     private static String TAG = "MosBiteFragment";
+    private static int VPOS = 0; //VerticalPage Position, for main Fragment only, should be sync with position in activity_main.xml
 
     private BestLocationProvider mBestLocationProvider;
     private BestLocationListener mBestLocationListener;
@@ -49,7 +54,6 @@ public class MosBiteFragment extends Fragment {
                         break;
                     case R.id.rhbutton:
                         biteOn = "RightHand";
-                        mInfo.deleteAllInfo();
                         break;
                     case R.id.rlbutton:
                         biteOn = "RightLeg";
@@ -62,7 +66,6 @@ public class MosBiteFragment extends Fragment {
                         break;
                     case R.id.lhbutton:
                         biteOn = "LeftHand";
-                        Log.d(TAG, mInfo.selectAllInfo());
                         break;
                     case R.id.llbutton:
                         biteOn = "LeftLeg";
@@ -73,7 +76,7 @@ public class MosBiteFragment extends Fragment {
                     default:
                         biteOn = "Unknown";
                 }
-//                Toast.makeText(v.getContext(), showText + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "Bite On: " + biteOn , Toast.LENGTH_SHORT).show();
                 Log.i(TAG, biteOn + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
                 boolean mosBite = mInfo.insertInfo(new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()), mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), "MosBite", biteOn);
 
@@ -118,18 +121,70 @@ public class MosBiteFragment extends Fragment {
 
     @Override
     public void onResume() {
+        Log.d(TAG, "onResume");
+        super.onResume();
+
+        EventBus.getInstance().register(this);
         initLocation();
         mBestLocationProvider.startLocationUpdatesWithListener(mBestLocationListener);
-
-        super.onResume();
+        onActive();
     }
 
     @Override
     public void onPause() {
+        Log.d(TAG, "onPause");
+        EventBus.getInstance().unregister(this);
         initLocation();
         mBestLocationProvider.stopLocationUpdates();
+        onInActive();
 
         super.onPause();
+    }
+
+    @Subscribe
+    public void onInVisible(VerticalPageInVisibleEvent event) {
+        if (event.setInVisible(VPOS)) {
+            Log.d(TAG, "onInVisible");
+            onInActive();
+        };
+    }
+
+    @Subscribe
+    public void onVisible(VerticalPageVisibleEvent event) {
+        if (event.setVisible(VPOS)) {
+            Log.d(TAG, "onVisible");
+            onActive();
+        };
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (isVisibleToUser) {
+            Log.d(TAG, "setUserVisibleHintTrue");
+            onActive();
+        }
+        else {
+            Log.d(TAG, "setUserVisibleHintFalse");
+            onInActive();
+        }
+    }
+
+    public void onActive() {
+        Log.d(TAG, "onActive");
+        initLocation();
+        if (mBestLocationProvider != null) {
+            mBestLocationProvider.startLocationUpdatesWithListener(mBestLocationListener);
+        }
+    }
+
+    public void onInActive() {
+        Log.d(TAG, "onInActive");
+//        initLocation();
+        if (mBestLocationProvider != null) {
+            mBestLocationProvider.stopLocationUpdates();
+        }
     }
 
     private void initLocation() {
@@ -138,27 +193,27 @@ public class MosBiteFragment extends Fragment {
 
                 @Override
                 public void onStatusChanged(String provider, int status, Bundle extras) {
-                    Log.i(TAG, "onStatusChanged PROVIDER:" + provider + " STATUS:" + String.valueOf(status));
+                    Log.i(TAG, "onStatusChanged, PROVIDER:" + provider + ", STATUS:" + String.valueOf(status));
                 }
 
                 @Override
                 public void onProviderEnabled(String provider) {
-                    Log.i(TAG, "onProviderEnabled PROVIDER:" + provider);
+                    Log.i(TAG, "onProviderEnabled, PROVIDER:" + provider);
                 }
 
                 @Override
                 public void onProviderDisabled(String provider) {
-                    Log.i(TAG, "onProviderDisabled PROVIDER:" + provider);
+                    Log.i(TAG, "onProviderDisabled, PROVIDER:" + provider);
                 }
 
                 @Override
                 public void onLocationUpdateTimeoutExceeded(LocationType type) {
-                    Log.w(TAG, "onLocationUpdateTimeoutExceeded PROVIDER:" + type);
+                    Log.w(TAG, "onLocationUpdateTimeoutExceeded, TYPE:" + type);
                 }
 
                 @Override
                 public void onLocationUpdate(Location location, BestLocationProvider.LocationType type, boolean isFresh) {
-                    Log.i(TAG, "onLocationUpdate TYPE:" + type + " Location:" + mBestLocationProvider.locationToString(location));
+                    Log.i(TAG, "onLocationUpdate, TYPE:" + type + ", LOCATION:" + mBestLocationProvider.locationToString(location));
                 }
             };
 

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,11 +16,8 @@ import com.netsdo.swipe4d.PageChangedEvent;
 import java.util.ArrayList;
 
 public class MosCompositeFragment extends Fragment {
-// todo, to implement fragment pause/resume method
-// refer to http://stackoverflow.com/questions/22184406/run-code-when-user-swipes-out-of-viewpager-fragment
-
     private static String TAG = "MosCompositeFragment";
-
+    
 	private ViewPager mHorizontalPager;
 	private int mCentralPageIndex = 0;
 	private OnPageChangeListener mPagerChangeListener = new OnPageChangeListener() {
@@ -30,7 +28,6 @@ public class MosCompositeFragment extends Fragment {
 
 		@Override
 		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
 		}
 
 		@Override

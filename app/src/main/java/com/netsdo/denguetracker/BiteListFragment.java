@@ -3,12 +3,18 @@ package com.netsdo.denguetracker;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.netsdo.swipe4d.EventBus;
+import com.netsdo.swipe4d.VerticalPageInVisibleEvent;
+import com.netsdo.swipe4d.VerticalPageVisibleEvent;
+import com.squareup.otto.Subscribe;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class BiteListFragment extends Fragment {
-
+    private static String TAG = "BiteListFragment";
 
     private ListView mList;
     private BiteListAdapter mAdapter;
@@ -64,12 +70,12 @@ public class BiteListFragment extends Fragment {
         }
 
         public Object getItem(int position) {
-            // TODO Auto-generated method stub
+            //todo, function: Auto-generated method stub
             return null;
         }
 
         public long getItemId(int position) {
-            // TODO Auto-generated method stub
+            //todo, function: Auto-generated method stub
             return 0;
         }
 
@@ -113,8 +119,43 @@ public class BiteListFragment extends Fragment {
 
     @Override
     public void onResume() {
-        displayList();
+        Log.d(TAG, "onResume");
         super.onResume();
+
+        onActive();
+    }
+
+    @Override
+    public void onPause() {
+        Log.d(TAG, "onPause");
+
+        onInActive();
+
+        super.onPause();
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (isVisibleToUser) {
+            Log.d(TAG, "setUserVisibleHintTrue");
+            onActive();
+        }
+        else {
+            Log.d(TAG, "setUserVisibleHintFalse");
+            onInActive();
+        }
+    }
+
+    public void onActive() {
+        Log.d(TAG, "onActive");
+
+        displayList();
+    }
+
+    public void onInActive() {
+        Log.d(TAG, "onInActive");
     }
 
     private void displayList() {
@@ -125,6 +166,10 @@ public class BiteListFragment extends Fragment {
         iwhat.clear();
 
         try {
+            String AllInfo = mInfo.selectAllInfo();
+            if (AllInfo == null) { // no data stored
+                return;
+            }
             JSONObject mObj = new JSONObject(mInfo.selectAllInfo());
             Integer mNoRec = mObj.getInt("norec");
             JSONArray mInfoObj = mObj.getJSONArray("info");

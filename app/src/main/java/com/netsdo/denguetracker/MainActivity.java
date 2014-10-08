@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
@@ -13,6 +14,8 @@ import com.netsdo.swipe4d.VerticalPager;
 import com.squareup.otto.Subscribe;
 
 public class MainActivity extends FragmentActivity {
+
+    private static String TAG = "MainActivity";
 
 	private static final int START_PAGE_INDEX = 0;
 
@@ -75,7 +78,7 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	@Subscribe
-	public void onLocationChanged(PageChangedEvent event) {
+	public void onPageChanged(PageChangedEvent event) {
 		mVerticalPager.setPagingEnabled(event.hasVerticalNeighbors());
 	}
 

@@ -8,6 +8,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -170,7 +171,7 @@ public class BestLocationProvider {
 	private void initLocationListener(){
 		mLocationListener = new LocationListener() {
 		    public void onLocationChanged(Location location) {
-		      Log.i(TAG, "onLocationChanged: " + locationToString(location));
+		      Log.d(TAG, "onLocationChanged, LOCATION:" + locationToString(location));
 
 		      if(isBetterLocation(location, mLocation)){
 		    	  updateLocation(location, providerToLocationType(location.getProvider()), true);
@@ -187,7 +188,7 @@ public class BestLocationProvider {
 		    		  }
 		    	  }
 
-		    	  Log.d(TAG, "onLocationChanged NEW BEST LOCATION: " + locationToString(mLocation));
+		    	  Log.d(TAG, "onLocationChanged, BETTER LOCATION:" + locationToString(mLocation));
 		      }
 		    }
 
@@ -211,13 +212,13 @@ public class BestLocationProvider {
 		} else if(provider.equals("network")){
 			return LocationType.CELL;
 		} else {
-			Log.w(TAG, "providerToLocationType Unknown Provider: " + provider);
+			Log.w(TAG, "providerToLocationType, UNKNOWN PROVIDER:" + provider);
 			return LocationType.UNKNOWN;
 		}
 	}
 
     public Location getLocation() {
-        //todo, to handle null location case which may cause app crash.
+        //todo, loophole: to handle null location case which may cause app crash.
         return mLocation;
     }
 
@@ -225,15 +226,17 @@ public class BestLocationProvider {
         JSONObject mObj = new JSONObject();
 
         try {
-            mObj.put("latitude", l.getLatitude());
             mObj.put("longitude", l.getLongitude());
+            mObj.put("latitude", l.getLatitude());
             mObj.put("altitude", l.getAltitude());
             mObj.put("speed", l.getSpeed());
             mObj.put("bearing", l.getBearing());
             mObj.put("accuracy", l.getAccuracy());
             mObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(l.getTime()));
             mObj.put("provider", l.getProvider());
-//            mObj.put("elapsedrealtimenanos", l.getElapsedRealtimeNanos()); for API 17 only.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                mObj.put("elapsedrealtimenanos", l.getElapsedRealtimeNanos());
+            }
             mObj.put("extras", l.getExtras());
             return mObj.toString();
         } catch (JSONException e) {
@@ -321,7 +324,7 @@ public class BestLocationProvider {
 					Thread.sleep(1000);
 				}
 	        	} catch (InterruptedException e) {
-				Log.e(TAG, "Timeout: Exception in doInBackground: " + e.getMessage());
+				Log.e(TAG, "doInBackground, LOCATION TIMEOUT EXCEPTION:" + e.getMessage());
 			}
 			return null;
 		}

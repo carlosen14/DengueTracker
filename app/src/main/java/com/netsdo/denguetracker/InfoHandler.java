@@ -171,6 +171,7 @@ public class InfoHandler {
             if (mCursor != null && !mCursor.isClosed()) {
                 mCursor.close();
             }
+
             return null;
         } else {
             try {
@@ -198,6 +199,7 @@ public class InfoHandler {
                 }
 
                 mObj.put("info", mInfoObj);
+
                 return mObj.toString();
             } catch (JSONException e) {
                 e.printStackTrace();
