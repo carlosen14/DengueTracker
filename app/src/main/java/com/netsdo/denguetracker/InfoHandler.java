@@ -157,19 +157,21 @@ public class InfoHandler {
     }
 
     public String selectAllInfo () {
-        if (mCursor != null && !mCursor.isClosed()) {
-            mCursor.close();
-        }
+        Cursor cursor;
+        String sql;
+        Integer norec;
+        String datetime;
 
-        mSQL = "SELECT rowid, iwhen, iwhere, ihow, iwhat FROM Info;";
-        Log.d(TAG, mSQL);
+        sql = "SELECT rowid, iwhen, iwhere, ihow, iwhat FROM Info ORDER BY iwhen DESC;";
+        datetime = new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date());
 
-        mDateTime = new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date());
-        mCursor = mDB.rawQuery(mSQL, null);
-        mNoRec = mCursor.getCount();
-        if (mNoRec == 0) {
-            if (mCursor != null && !mCursor.isClosed()) {
-                mCursor.close();
+        Log.d(TAG, "selectAllInfo, DATE:" + datetime + ", SQL:" + sql);
+
+        cursor = mDB.rawQuery(sql, null);
+        norec = cursor.getCount();
+        if (norec == 0) {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
             }
 
             return null;
@@ -178,34 +180,100 @@ public class InfoHandler {
                 JSONObject mObj = new JSONObject();
                 JSONArray mInfoObj = new JSONArray();
 
-                mObj.put("sql", mSQL);
-                mObj.put("norec", mNoRec);
-                mObj.put("datetime", mDateTime);
-                while (mCursor.moveToNext()) {
+                mObj.put("sql", sql);
+                mObj.put("norec", norec);
+                mObj.put("datetime", datetime);
+                while (cursor.moveToNext()) {
                     JSONObject mInfoRec = new JSONObject();
                     JSONObject mwhere;
-                    mInfoRec.put("position", mCursor.getPosition());
-                    mInfoRec.put("rowid", mCursor.getInt(0));
-                    mInfoRec.put("iwhen", mCursor.getString(1));
-                    mInfoRec.put("ihow", mCursor.getString(3));
-                    mInfoRec.put("iwhat", mCursor.getString(4));
-                    mwhere = new JSONObject(mCursor.getString(2)); //position is stored in JSON format.
+                    mInfoRec.put("position", cursor.getPosition());
+                    mInfoRec.put("rowid", cursor.getInt(0));
+                    mInfoRec.put("iwhen", cursor.getString(1));
+                    mInfoRec.put("ihow", cursor.getString(3));
+                    mInfoRec.put("iwhat", cursor.getString(4));
+                    mwhere = new JSONObject(cursor.getString(2)); //position is stored in JSON format.
                     mInfoRec.put("iwhere", mwhere);
                     mInfoObj.put(mInfoRec);
                 }
-
-                if (mCursor != null && !mCursor.isClosed()) {
-                    mCursor.close();
+                mObj.put("info", mInfoObj);
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
                 }
 
+                Log.d(TAG, "selectAllInfo, JSON:" + mObj.toString());
+                return mObj.toString();
+            } catch (JSONException e) {
+                e.printStackTrace();
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
+                }
+
+                return null;
+            }
+        }
+    }
+
+    public String selectAllInfo (String jsql) {
+        Cursor cursor;
+        String sql;
+        Integer norec;
+        String datetime;
+
+        try {
+            JSONObject mObj = null;
+            mObj = new JSONObject(jsql);
+            sql = mObj.getString("sql");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        datetime = new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date());
+
+        Log.d(TAG, "selectAllInfo(String), DATE:" + datetime + ", JSON:" + jsql);
+
+        cursor = mDB.rawQuery(sql, null);
+        norec = cursor.getCount();
+        if (norec == 0) {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+
+            return null;
+        } else {
+            try {
+                JSONObject mObj = new JSONObject();
+                JSONArray mInfoObj = new JSONArray();
+
+                mObj.put("sql", sql);
+                mObj.put("norec", norec);
+                mObj.put("datetime", datetime);
+                while (cursor.moveToNext()) {
+                    JSONObject mInfoRec = new JSONObject();
+                    JSONObject mwhere;
+                    mInfoRec.put("position", cursor.getPosition());
+                    mInfoRec.put("rowid", cursor.getInt(0));
+                    mInfoRec.put("iwhen", cursor.getString(1));
+                    mInfoRec.put("ihow", cursor.getString(3));
+                    mInfoRec.put("iwhat", cursor.getString(4));
+                    mwhere = new JSONObject(cursor.getString(2)); //position is stored in JSON format.
+                    mInfoRec.put("iwhere", mwhere);
+                    mInfoObj.put(mInfoRec);
+                }
                 mObj.put("info", mInfoObj);
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
+                }
+
+                Log.d(TAG, "selectAllInfo(String), JSON:" + mObj.toString());
 
                 return mObj.toString();
             } catch (JSONException e) {
                 e.printStackTrace();
-                if (mCursor != null && !mCursor.isClosed()) {
-                    mCursor.close();
+                if (cursor != null && !cursor.isClosed()) {
+                    cursor.close();
                 }
+
                 return null;
             }
         }

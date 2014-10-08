@@ -34,7 +34,6 @@ public class TempRecFragment extends Fragment {
         super.onResume();
 
         EventBus.getInstance().register(this);
-        onActive();
     }
 
     @Override
@@ -42,7 +41,6 @@ public class TempRecFragment extends Fragment {
         Log.d(TAG, "onPause");
 
         EventBus.getInstance().unregister(this);
-        onInActive();
 
         super.onPause();
     }

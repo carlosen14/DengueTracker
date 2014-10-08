@@ -76,7 +76,7 @@ public class MosBiteFragment extends Fragment {
                     default:
                         biteOn = "Unknown";
                 }
-                Toast.makeText(v.getContext(), "Bite On: " + biteOn , Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "Mosquito Bite On " + biteOn , Toast.LENGTH_SHORT).show();
                 Log.i(TAG, biteOn + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
                 boolean mosBite = mInfo.insertInfo(new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()), mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), "MosBite", biteOn);
 
@@ -84,11 +84,9 @@ public class MosBiteFragment extends Fragment {
                 if (norec != 0) {
                     String jsonInfo = mInfo.selectNextInfo();
                     while (jsonInfo != null) {
-//                        Log.i(TAG, "rowid:" + rowid + " iwhen: " + iwhen + " iwhere: " + iwhere + " ihow: " + ihow + " iwhat: " + iwhat);
                         Log.d(TAG, jsonInfo);
                         jsonInfo = mInfo.selectNextInfo();
                     }
-
                 } else {
                     Log.i(TAG, "no record of Info found.");
                 }
@@ -125,18 +123,13 @@ public class MosBiteFragment extends Fragment {
         super.onResume();
 
         EventBus.getInstance().register(this);
-        initLocation();
-        mBestLocationProvider.startLocationUpdatesWithListener(mBestLocationListener);
-        onActive();
     }
 
     @Override
     public void onPause() {
         Log.d(TAG, "onPause");
+
         EventBus.getInstance().unregister(this);
-        initLocation();
-        mBestLocationProvider.stopLocationUpdates();
-        onInActive();
 
         super.onPause();
     }
@@ -181,7 +174,7 @@ public class MosBiteFragment extends Fragment {
 
     public void onInActive() {
         Log.d(TAG, "onInActive");
-//        initLocation();
+//        initLocation(); //original code has this line, but don't see it is necessary.
         if (mBestLocationProvider != null) {
             mBestLocationProvider.stopLocationUpdates();
         }

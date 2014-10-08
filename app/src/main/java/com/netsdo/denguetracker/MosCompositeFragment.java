@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,7 +55,8 @@ public class MosCompositeFragment extends Fragment {
 	private void populateHozizontalPager() {
 		ArrayList<Class<? extends Fragment>> pages = new ArrayList<Class<? extends Fragment>>();
 		pages.add(MosBiteFragment.class);
-		pages.add(BiteListFragment.class);
+		pages.add(MosListFragment.class);
+        pages.add(MosEditFragment.class);
 		mCentralPageIndex = pages.indexOf(MosBiteFragment.class);
 		mHorizontalPager.setAdapter(new FragmentsClassesPagerAdapter(getChildFragmentManager(), getActivity(), pages));
 	}

@@ -11,24 +11,17 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.netsdo.swipe4d.EventBus;
-import com.netsdo.swipe4d.VerticalPageInVisibleEvent;
-import com.netsdo.swipe4d.VerticalPageVisibleEvent;
-import com.squareup.otto.Subscribe;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
-public class BiteListFragment extends Fragment {
-    private static String TAG = "BiteListFragment";
+public class MosListFragment extends Fragment {
+    private static String TAG = "MosListFragment";
 
     private ListView mList;
-    private BiteListAdapter mAdapter;
+    private MosListAdapter mAdapter;
     private MainActivity parentActivity;
     private InfoHandler mInfo;
 
@@ -45,7 +38,7 @@ public class BiteListFragment extends Fragment {
         TextView ihow;
         TextView iwhat;
     }
-	public class BiteListAdapter extends BaseAdapter {
+	public class MosListAdapter extends BaseAdapter {
 
         private Context mContext;
         private ArrayList<String> rowid;
@@ -54,7 +47,7 @@ public class BiteListFragment extends Fragment {
         private ArrayList<String> ihow;
         private ArrayList<String> iwhat;
 
-        public BiteListAdapter(Context context, ArrayList<String> rowid, ArrayList<String> iwhen, ArrayList<String> iwhere, ArrayList<String> ihow, ArrayList<String> iwhat) {
+        public MosListAdapter(Context context, ArrayList<String> rowid, ArrayList<String> iwhen, ArrayList<String> iwhere, ArrayList<String> ihow, ArrayList<String> iwhat) {
             mContext = context;
 
             this.rowid = rowid;
@@ -85,7 +78,7 @@ public class BiteListFragment extends Fragment {
 
             if (child == null) {
                 layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                child = layoutInflater.inflate(R.layout.fragment_bite_item, null);
+                child = layoutInflater.inflate(R.layout.fragment_mos_item, null);
                 mInfoHolder = new InfoHolder();
                 mInfoHolder.rowid = (TextView) child.findViewById(R.id.rowid);
                 mInfoHolder.iwhen = (TextView) child.findViewById(R.id.iwhen);
@@ -108,7 +101,7 @@ public class BiteListFragment extends Fragment {
 
     @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View fragmentView = inflater.inflate(R.layout.fragment_bite_list, container, false);
+		View fragmentView = inflater.inflate(R.layout.fragment_mos_list, container, false);
         mList = (ListView) fragmentView.findViewById(R.id.bite_list);
 
         parentActivity = (MainActivity) getActivity();
@@ -121,16 +114,11 @@ public class BiteListFragment extends Fragment {
     public void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
-
-        onActive();
     }
 
     @Override
     public void onPause() {
         Log.d(TAG, "onPause");
-
-        onInActive();
-
         super.onPause();
     }
 
@@ -159,6 +147,7 @@ public class BiteListFragment extends Fragment {
     }
 
     private void displayList() {
+        String allinfo;
         rowid.clear();
         iwhen.clear();
         iwhere.clear();
@@ -166,11 +155,20 @@ public class BiteListFragment extends Fragment {
         iwhat.clear();
 
         try {
-            String AllInfo = mInfo.selectAllInfo();
-            if (AllInfo == null) { // no data stored
+            String sql = "SELECT rowid, iwhen, iwhere, ihow, iwhat FROM Info ORDER BY iwhen DESC;";
+            JSONObject mObj = new JSONObject();
+            mObj.put("sql", sql);
+            allinfo = mInfo.selectAllInfo(mObj.toString());
+            if (allinfo == null) { // no data stored
                 return;
             }
-            JSONObject mObj = new JSONObject(mInfo.selectAllInfo());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        try {
+            JSONObject mObj = new JSONObject(allinfo);
             Integer mNoRec = mObj.getInt("norec");
             JSONArray mInfoObj = mObj.getJSONArray("info");
             for (int i = 0; i < mNoRec; i++) {
@@ -178,11 +176,12 @@ public class BiteListFragment extends Fragment {
                 rowid.add(mInfoRec.getString("rowid"));
                 iwhen.add(mInfoRec.getString("iwhen"));
                 iwhere.add(mInfoRec.getString("iwhere"));
-                ihow.add(mInfoRec.getString("ihow"));
+//                ihow.add(mInfoRec.getString("ihow"));
+                ihow.add(("Mosquito Bite On "));
                 iwhat.add(mInfoRec.getString("iwhat"));
             }
 
-            BiteListAdapter mAdapter = new BiteListAdapter(parentActivity, rowid, iwhen, iwhere, ihow, iwhat);
+            MosListAdapter mAdapter = new MosListAdapter(parentActivity, rowid, iwhen, iwhere, ihow, iwhat);
             mList.setAdapter(mAdapter);
 
         } catch (JSONException e) {

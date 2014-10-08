@@ -7,12 +7,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class TempListFragment extends Fragment {
-    private static String TAG = "TempListFragment";
+public class MosEditFragment extends Fragment {
+    private static String TAG = "MosEditFragment";
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View fragmentView = inflater.inflate(R.layout.fragment_temp_list, container, false);
+		View fragmentView = inflater.inflate(R.layout.fragment_mos_edit, container, false);
 		return fragmentView;
 	}
 
@@ -20,11 +20,16 @@ public class TempListFragment extends Fragment {
     public void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
+
+//        onActive();
     }
 
     @Override
     public void onPause() {
         Log.d(TAG, "onPause");
+
+//        onInActive();
+
         super.onPause();
     }
 
