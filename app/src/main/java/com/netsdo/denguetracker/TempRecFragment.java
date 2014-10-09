@@ -34,6 +34,7 @@ public class TempRecFragment extends Fragment {
         super.onResume();
 
         EventBus.getInstance().register(this);
+        onActive();
     }
 
     @Override
@@ -41,12 +42,13 @@ public class TempRecFragment extends Fragment {
         Log.d(TAG, "onPause");
 
         EventBus.getInstance().unregister(this);
+        onInActive();
 
         super.onPause();
     }
 
     @Subscribe
-    public void onInVisible(VerticalPageInVisibleEvent event) {
+    public void evenInVisible(VerticalPageInVisibleEvent event) {
         if (event.setInVisible(VPOS)) {
             Log.d(TAG, "onInVisible");
             onInActive();
@@ -54,7 +56,7 @@ public class TempRecFragment extends Fragment {
     }
 
     @Subscribe
-    public void onVisible(VerticalPageVisibleEvent event) {
+    public void evenVisible(VerticalPageVisibleEvent event) {
         if (event.setVisible(VPOS)) {
             Log.d(TAG, "onVisible");
             onActive();

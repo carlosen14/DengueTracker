@@ -7,13 +7,3 @@
 :app:assembleDebug       : failed to load module
 
 // todo
-        <com.antistatic.spinnerwheel.WheelVerticalView
-            android:id="@+id/day"
-            app:visibleItems="4"
-            app:selectionDivider="@drawable/divider_dark_gradient_horizontal"
-            app:selectionDividerHeight="1px"
-            app:selectionDividerActiveAlpha="100"
-            app:selectionDividerDimmedAlpha="255"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content" />
-

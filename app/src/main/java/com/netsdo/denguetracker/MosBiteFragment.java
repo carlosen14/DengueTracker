@@ -54,6 +54,7 @@ public class MosBiteFragment extends Fragment {
                         break;
                     case R.id.rhbutton:
                         biteOn = "RightHand";
+                        mInfo.deleteAllInfo();  // backdoor to clean track records for testing purpose.
                         break;
                     case R.id.rlbutton:
                         biteOn = "RightLeg";
@@ -123,6 +124,7 @@ public class MosBiteFragment extends Fragment {
         super.onResume();
 
         EventBus.getInstance().register(this);
+        onActive();
     }
 
     @Override
@@ -130,12 +132,13 @@ public class MosBiteFragment extends Fragment {
         Log.d(TAG, "onPause");
 
         EventBus.getInstance().unregister(this);
+        onInActive();
 
         super.onPause();
     }
 
     @Subscribe
-    public void onInVisible(VerticalPageInVisibleEvent event) {
+    public void evenInVisible(VerticalPageInVisibleEvent event) {
         if (event.setInVisible(VPOS)) {
             Log.d(TAG, "onInVisible");
             onInActive();
@@ -143,7 +146,7 @@ public class MosBiteFragment extends Fragment {
     }
 
     @Subscribe
-    public void onVisible(VerticalPageVisibleEvent event) {
+    public void evenVisible(VerticalPageVisibleEvent event) {
         if (event.setVisible(VPOS)) {
             Log.d(TAG, "onVisible");
             onActive();
@@ -173,6 +176,7 @@ public class MosBiteFragment extends Fragment {
     }
 
     public void onInActive() {
+        //todo, to solve duplicate calling to onActive/onInActive from onResume/OnPause, setUserVisibleHint and evenActive/evenInActive
         Log.d(TAG, "onInActive");
 //        initLocation(); //original code has this line, but don't see it is necessary.
         if (mBestLocationProvider != null) {

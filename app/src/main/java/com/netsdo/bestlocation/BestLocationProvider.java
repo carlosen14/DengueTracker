@@ -218,29 +218,42 @@ public class BestLocationProvider {
 	}
 
     public Location getLocation() {
-        //todo, loophole: to handle null location case which may cause app crash.
         return mLocation;
     }
 
 	public String locationToString(Location l) {
-        JSONObject mObj = new JSONObject();
-
         try {
-            mObj.put("longitude", l.getLongitude());
-            mObj.put("latitude", l.getLatitude());
-            mObj.put("altitude", l.getAltitude());
-            mObj.put("speed", l.getSpeed());
-            mObj.put("bearing", l.getBearing());
-            mObj.put("accuracy", l.getAccuracy());
-            mObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(l.getTime()));
-            mObj.put("provider", l.getProvider());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                mObj.put("elapsedrealtimenanos", l.getElapsedRealtimeNanos());
+            JSONObject mObj = new JSONObject();
+            if (l == null) {
+                mObj.put("longitude", 0);
+                mObj.put("latitude", 0);
+                mObj.put("altitude", 0);
+                mObj.put("speed", 0);
+                mObj.put("bearing", 0);
+                mObj.put("accuracy", 0);
+                mObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date()));
+                mObj.put("provider", "null");
+                mObj.put("elapsedrealtimenanos", 0);
+                mObj.put("extras", "null");
+            } else {
+                mObj.put("longitude", l.getLongitude());
+                mObj.put("latitude", l.getLatitude());
+                mObj.put("altitude", l.getAltitude());
+                mObj.put("speed", l.getSpeed());
+                mObj.put("bearing", l.getBearing());
+                mObj.put("accuracy", l.getAccuracy());
+                mObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(l.getTime()));
+                mObj.put("provider", l.getProvider());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    mObj.put("elapsedrealtimenanos", l.getElapsedRealtimeNanos());
+                }
+                mObj.put("extras", l.getExtras());
             }
-            mObj.put("extras", l.getExtras());
+
             return mObj.toString();
         } catch (JSONException e) {
             e.printStackTrace();
+
             return null;
         }
 	}

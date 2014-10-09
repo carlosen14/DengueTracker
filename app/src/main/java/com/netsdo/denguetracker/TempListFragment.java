@@ -20,11 +20,16 @@ public class TempListFragment extends Fragment {
     public void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
+
+        onActive();
     }
 
     @Override
     public void onPause() {
         Log.d(TAG, "onPause");
+
+        onInActive();
+
         super.onPause();
     }
 
