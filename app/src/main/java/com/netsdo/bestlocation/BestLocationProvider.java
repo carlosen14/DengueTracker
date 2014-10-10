@@ -171,7 +171,7 @@ public class BestLocationProvider {
 	private void initLocationListener(){
 		mLocationListener = new LocationListener() {
 		    public void onLocationChanged(Location location) {
-		      Log.d(TAG, "onLocationChanged, LOCATION:" + locationToString(location));
+//todo		      Log.d(TAG, "onLocationChanged, LOCATION:" + locationToString(location));
 
 		      if(isBetterLocation(location, mLocation)){
 		    	  updateLocation(location, providerToLocationType(location.getProvider()), true);
@@ -188,7 +188,7 @@ public class BestLocationProvider {
 		    		  }
 		    	  }
 
-		    	  Log.d(TAG, "onLocationChanged, BETTER LOCATION:" + locationToString(mLocation));
+//todo		    	  Log.d(TAG, "onLocationChanged, BETTER LOCATION:" + locationToString(mLocation));
 		      }
 		    }
 

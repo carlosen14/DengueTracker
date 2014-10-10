@@ -1,6 +1,5 @@
 package com.netsdo.denguetracker;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -18,79 +17,84 @@ import com.netsdo.bestlocation.BestLocationListener;
 import com.netsdo.bestlocation.BestLocationProvider;
 import com.netsdo.bestlocation.BestLocationProvider.LocationType;
 import com.netsdo.swipe4d.EventBus;
-import com.netsdo.swipe4d.PageChangedEvent;
-import com.netsdo.swipe4d.VerticalPageInVisibleEvent;
-import com.netsdo.swipe4d.VerticalPageVisibleEvent;
+import com.netsdo.swipe4d.VerticalPagerSwitchedEvent;
 import com.squareup.otto.Subscribe;
 
 public class MosBiteFragment extends Fragment {
     private static String TAG = "MosBiteFragment";
-    private static int VPOS = 0; //VerticalPage Position, for main Fragment only, should be sync with position in activity_main.xml
+    private static int VPOS = 0; //VerticalPage Position, for Fragment defined as Central Page only, should be same as the position in activity_main.xml
 
     private BestLocationProvider mBestLocationProvider;
     private BestLocationListener mBestLocationListener;
-    private MainActivity parentActivity;
+    private MainActivity mParentActivity;
     private InfoHandler mInfo;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_mos_bite, container, false);
-        parentActivity = (MainActivity) getActivity();
-        mInfo = parentActivity.mInfo;
+        mParentActivity = (MainActivity) getActivity();
+        mInfo = mParentActivity.mInfo;
 
         View.OnClickListener buttonListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String biteOn;
+                String lBiteOn;
                 switch (v.getId()) {
                     case R.id.hbutton:
-                        biteOn = "Head";
+                        lBiteOn = "Head";
                         break;
                     case R.id.bbutton:
-                        biteOn = "Body";
+                        lBiteOn = "Body";
                         break;
                     case R.id.rabutton:
-                        biteOn = "RightArm";
+                        lBiteOn = "RightArm";
                         break;
                     case R.id.rhbutton:
-                        biteOn = "RightHand";
-                        mInfo.deleteAllInfo();  // backdoor to clean track records for testing purpose.
+                        lBiteOn = "RightHand";
+                        mInfo.truncateInfo();  // for testing purpose, to be removed before final release.
                         break;
                     case R.id.rlbutton:
-                        biteOn = "RightLeg";
+                        lBiteOn = "RightLeg";
                         break;
                     case R.id.rfbutton:
-                        biteOn = "RightFoot";
+                        lBiteOn = "RightFoot";
                         break;
                     case R.id.labutton:
-                        biteOn = "LeftArm";
+                        lBiteOn = "LeftArm";
                         break;
                     case R.id.lhbutton:
-                        biteOn = "LeftHand";
+                        lBiteOn = "LeftHand";
+                        Integer norec = mInfo.openSelectInfo(null, null, null, null, null, null, null); // for testing purpose, to be removed before final release.
+                        if (norec != 0) {
+                            String lInfo = mInfo.selectNextInfo();
+                            while (lInfo != null) {
+                                Log.d(TAG, lInfo);
+                                lInfo = mInfo.selectNextInfo();
+                            }
+                        } else {
+                            Log.i(TAG, "no record of Info found.");
+                        }
                         break;
                     case R.id.llbutton:
-                        biteOn = "LeftLeg";
+                        lBiteOn = "LeftLeg";
                         break;
                     case R.id.lfbutton:
-                        biteOn = "LeftFoot";
+                        lBiteOn = "LeftFoot";
                         break;
                     default:
-                        biteOn = "Unknown";
+                        lBiteOn = "Unknown";
                 }
-                Toast.makeText(v.getContext(), "Mosquito Bite On " + biteOn , Toast.LENGTH_SHORT).show();
-                Log.i(TAG, biteOn + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
-                boolean mosBite = mInfo.insertInfo(new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()), mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), "MosBite", biteOn);
+                Toast.makeText(v.getContext(), "Mosquito Bite On " + lBiteOn, Toast.LENGTH_SHORT).show();
+                Log.i(TAG, lBiteOn + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
+                long mosBite = mInfo.insertInfo(
+                        null, //iwho
+                        new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()), // iwhen
+                        mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), //iwhere
+                        "MosBite", //ihow
+                        lBiteOn, //iwhat
+                        null); // iwhy
 
-                Integer norec = mInfo.openSelectInfo(null, null, null, null, null);
-                if (norec != 0) {
-                    String jsonInfo = mInfo.selectNextInfo();
-                    while (jsonInfo != null) {
-                        Log.d(TAG, jsonInfo);
-                        jsonInfo = mInfo.selectNextInfo();
-                    }
-                } else {
-                    Log.i(TAG, "no record of Info found.");
-                }
             }
         };
 
@@ -138,19 +142,20 @@ public class MosBiteFragment extends Fragment {
     }
 
     @Subscribe
-    public void evenInVisible(VerticalPageInVisibleEvent event) {
-        if (event.setInVisible(VPOS)) {
-            Log.d(TAG, "onInVisible");
-            onInActive();
-        };
-    }
-
-    @Subscribe
-    public void evenVisible(VerticalPageVisibleEvent event) {
-        if (event.setVisible(VPOS)) {
-            Log.d(TAG, "onVisible");
-            onActive();
-        };
+    public void evenSwitched(VerticalPagerSwitchedEvent event) {
+        Log.d(TAG, "evenSwitched");
+        switch (event.getEvent(VPOS)) {
+            case -1:
+                onInActive();
+                break;
+            case 0:
+                break;
+            case 1:
+                onActive();
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -160,8 +165,7 @@ public class MosBiteFragment extends Fragment {
         if (isVisibleToUser) {
             Log.d(TAG, "setUserVisibleHintTrue");
             onActive();
-        }
-        else {
+        } else {
             Log.d(TAG, "setUserVisibleHintFalse");
             onInActive();
         }
@@ -176,9 +180,7 @@ public class MosBiteFragment extends Fragment {
     }
 
     public void onInActive() {
-        //todo, to solve duplicate calling to onActive/onInActive from onResume/OnPause, setUserVisibleHint and evenActive/evenInActive
         Log.d(TAG, "onInActive");
-//        initLocation(); //original code has this line, but don't see it is necessary.
         if (mBestLocationProvider != null) {
             mBestLocationProvider.stopLocationUpdates();
         }
@@ -205,7 +207,7 @@ public class MosBiteFragment extends Fragment {
 
                 @Override
                 public void onLocationUpdateTimeoutExceeded(LocationType type) {
-                    Log.w(TAG, "onLocationUpdateTimeoutExceeded, TYPE:" + type);
+//todo                    Log.w(TAG, "onLocationUpdateTimeoutExceeded, TYPE:" + type);
                 }
 
                 @Override

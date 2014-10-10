@@ -7,9 +7,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.netsdo.swipe4d.EventBus;
+import com.netsdo.swipe4d.MosEditEvent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,94 +26,101 @@ public class MosListFragment extends Fragment {
     private static String TAG = "MosListFragment";
 
     private ListView mList;
-    private MosListAdapter mAdapter;
-    private MainActivity parentActivity;
+    private MainActivity mParentActivity;
     private InfoHandler mInfo;
 
-    private ArrayList<String> rowid = new ArrayList<String>();
-    private ArrayList<String> iwhen = new ArrayList<String>();
-    private ArrayList<String> iwhere = new ArrayList<String>();
-    private ArrayList<String> ihow = new ArrayList<String>();
-    private ArrayList<String> iwhat = new ArrayList<String>();
+    private ArrayList<Info> mInfoArray;
 
-    public class InfoHolder {
+    public class InfoViewer {
         TextView rowid;
+        TextView iwho;
         TextView iwhen;
         TextView iwhere;
         TextView ihow;
         TextView iwhat;
+        TextView iwhy;
     }
-	public class MosListAdapter extends BaseAdapter {
 
-        private Context mContext;
-        private ArrayList<String> rowid;
-        private ArrayList<String> iwhen;
-        private ArrayList<String> iwhere;
-        private ArrayList<String> ihow;
-        private ArrayList<String> iwhat;
+    public InfoViewer mInfoViewer = new InfoViewer();
 
-        public MosListAdapter(Context context, ArrayList<String> rowid, ArrayList<String> iwhen, ArrayList<String> iwhere, ArrayList<String> ihow, ArrayList<String> iwhat) {
-            mContext = context;
+    public class MosListAdapter extends BaseAdapter {
 
-            this.rowid = rowid;
-            this.iwhen = iwhen;
-            this.iwhere = iwhere;
-            this.ihow = ihow;
-            this.iwhat = iwhat;
+        private Context mmContext;
+        private ArrayList<Info> mmInfoArray;
 
+        public MosListAdapter(Context context, ArrayList<Info> InfoArray) {
+            mmContext = context;
+            mmInfoArray = InfoArray;
         }
 
         public int getCount() {
-            return rowid.size();
+            return mmInfoArray.size();
         }
 
         public Object getItem(int position) {
-            //todo, function: Auto-generated method stub
-            return null;
+            return mmInfoArray.get(position);
         }
 
         public long getItemId(int position) {
-            //todo, function: Auto-generated method stub
-            return 0;
+            return mmInfoArray.get(position).getRowid();
         }
 
         public View getView(int position, View child, ViewGroup parent) {
-            InfoHolder mInfoHolder;
-            LayoutInflater layoutInflater;
+            LayoutInflater lLayoutInflater;
 
             if (child == null) {
-                layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                child = layoutInflater.inflate(R.layout.fragment_mos_item, null);
-                mInfoHolder = new InfoHolder();
-                mInfoHolder.rowid = (TextView) child.findViewById(R.id.rowid);
-                mInfoHolder.iwhen = (TextView) child.findViewById(R.id.iwhen);
-                mInfoHolder.iwhere = (TextView) child.findViewById(R.id.iwhere);
-                mInfoHolder.ihow = (TextView) child.findViewById(R.id.ihow);
-                mInfoHolder.iwhat = (TextView) child.findViewById(R.id.iwhat);
-                child.setTag(mInfoHolder);
+                lLayoutInflater = (LayoutInflater) mmContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                child = lLayoutInflater.inflate(R.layout.fragment_mos_item, null);
+                mInfoViewer.rowid = (TextView) child.findViewById(R.id.rowid);
+                mInfoViewer.iwho = (TextView) child.findViewById(R.id.iwho);
+                mInfoViewer.iwhen = (TextView) child.findViewById(R.id.iwhen);
+                mInfoViewer.iwhere = (TextView) child.findViewById(R.id.iwhere);
+                mInfoViewer.ihow = (TextView) child.findViewById(R.id.ihow);
+                mInfoViewer.iwhat = (TextView) child.findViewById(R.id.iwhat);
+                mInfoViewer.iwhy = (TextView) child.findViewById(R.id.iwhy);
+                child.setTag(mInfoViewer);
             } else {
-                mInfoHolder = (InfoHolder) child.getTag();
+                mInfoViewer = (InfoViewer) child.getTag();
             }
-            mInfoHolder.rowid.setText(rowid.get(position));
-            mInfoHolder.iwhen.setText(iwhen.get(position));
-            mInfoHolder.iwhere.setText(iwhere.get(position));
-            mInfoHolder.ihow.setText(ihow.get(position));
-            mInfoHolder.iwhat.setText(iwhat.get(position));
+            mInfoViewer.rowid.setText(mmInfoArray.get(position).getRowid().toString());
+            mInfoViewer.iwho.setText(mmInfoArray.get(position).getIwho());
+            mInfoViewer.iwhen.setText(mmInfoArray.get(position).getIwhen());
+            mInfoViewer.iwhere.setText(mmInfoArray.get(position).getIwhere());//todo, to display key iwhere info only.
+            mInfoViewer.ihow.setText(mmInfoArray.get(position).getIhow());
+            mInfoViewer.iwhat.setText(mmInfoArray.get(position).getIwhat());
+            mInfoViewer.iwhy.setText(mmInfoArray.get(position).getIwhy());
 
             return child;
         }
     }
 
     @Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View fragmentView = inflater.inflate(R.layout.fragment_mos_list, container, false);
-        mList = (ListView) fragmentView.findViewById(R.id.bite_list);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View lView = inflater.inflate(R.layout.fragment_mos_list, container, false);
+        mList = (ListView) lView.findViewById(R.id.bite_list);
 
-        parentActivity = (MainActivity) getActivity();
-        mInfo = parentActivity.mInfo;
+        mParentActivity = (MainActivity) getActivity();
+        mInfo = mParentActivity.mInfo;
+        mInfoArray = new ArrayList<Info>();
 
-		return fragmentView;
-	}
+//        displayList();
+
+//        MosListAdapter mAdapter = new MosListAdapter(mParentActivity, mInfoArray);
+//        mList.setAdapter(mAdapter);
+
+        AdapterView.OnItemClickListener a;
+        a = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(mParentActivity, "position:" + position + ", rowid:" + mInfoArray.get(position).getRowid(), Toast.LENGTH_SHORT).show();
+                EventBus.getInstance().post(new MosEditEvent(mInfoArray.get(position).getRowid()));
+            }
+        };
+
+        mList.setOnItemClickListener(a);
+
+        return lView;
+    }
 
     @Override
     public void onResume() {
@@ -134,8 +146,7 @@ public class MosListFragment extends Fragment {
         if (isVisibleToUser) {
             Log.d(TAG, "setUserVisibleHintTrue");
             onActive();
-        }
-        else {
+        } else {
             Log.d(TAG, "setUserVisibleHintFalse");
             onInActive();
         }
@@ -152,45 +163,49 @@ public class MosListFragment extends Fragment {
     }
 
     private void displayList() {
-        String allinfo;
-        rowid.clear();
-        iwhen.clear();
-        iwhere.clear();
-        ihow.clear();
-        iwhat.clear();
+        String lSQL;
+        String lInfo;
+
+        mInfoArray.clear();
+
+        lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE ihow = 'MosBite' ORDER BY iwhen DESC;";
 
         try {
-            String sql = "SELECT rowid, iwhen, iwhere, ihow, iwhat FROM Info ORDER BY iwhen DESC;";
-            JSONObject mObj = new JSONObject();
-            mObj.put("sql", sql);
-            allinfo = mInfo.selectAllInfo(mObj.toString());
-            if (allinfo == null) { // no data stored
+            JSONObject lObj = new JSONObject();
+            lObj.put("sql", lSQL);
+            lInfo = mInfo.selectInfo(lObj.toString());
+            if (lInfo == null) { // no data stored
                 return;
             }
         } catch (JSONException e) {
             e.printStackTrace();
+
             return;
         }
 
         try {
-            JSONObject mObj = new JSONObject(allinfo);
-            Integer mNoRec = mObj.getInt("norec");
-            JSONArray mInfoObj = mObj.getJSONArray("info");
-            for (int i = 0; i < mNoRec; i++) {
-                JSONObject mInfoRec = mInfoObj.getJSONObject(i);
-                rowid.add(mInfoRec.getString("rowid"));
-                iwhen.add(mInfoRec.getString("iwhen"));
-                iwhere.add(mInfoRec.getString("iwhere"));
-//                ihow.add(mInfoRec.getString("ihow"));
-                ihow.add(("Mosquito Bite On "));
-                iwhat.add(mInfoRec.getString("iwhat"));
+            JSONObject lObj = new JSONObject(lInfo);
+            Integer lNoRec = lObj.getInt("norec");
+            JSONArray lInfoObj = lObj.getJSONArray("info");
+            for (int i = 0; i < lNoRec; i++) {
+                JSONObject lInfoRec = lInfoObj.getJSONObject(i);
+                JSONArray lsInfo = new JSONArray();
+                JSONObject lsObj = new JSONObject();
+                lsInfo.put(lInfoRec);
+                lsObj.put("info", lsInfo);
+                Info lcInfo = new Info();
+                if (lcInfo.setInfo(lsObj.toString())) {
+                    mInfoArray.add(lcInfo);
+                }
             }
 
-            MosListAdapter mAdapter = new MosListAdapter(parentActivity, rowid, iwhen, iwhere, ihow, iwhat);
+            MosListAdapter mAdapter = new MosListAdapter(mParentActivity, mInfoArray);
             mList.setAdapter(mAdapter);
 
         } catch (JSONException e) {
             e.printStackTrace();
+
+            return;
         }
 
     }

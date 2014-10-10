@@ -586,9 +586,7 @@ public class VerticalPager extends ViewGroup {
         invalidate();
 
         if (changingPages) {
-            Log.d(TAG, "snapToPage, WHICH PAGE:" + whichPage + ", WHERE:" + where);
-            EventBus.getInstance().post(new VerticalPageInVisibleEvent(where));
-            EventBus.getInstance().post(new VerticalPageVisibleEvent(whichPage));
+            EventBus.getInstance().post(new VerticalPagerSwitchedEvent(where, whichPage));
         }
     }
 

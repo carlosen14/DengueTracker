@@ -13,88 +13,86 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class InfoHandler {
-
     private static String TAG = "InfoHandler";
 
-    Context mContext;
+    private Context mContext;
     private SQLiteDatabase mDB;
-    private Cursor mCursor; // cursor used by selectInfo
+    private Cursor mCursor; // cursor used by selectInfo,
     private String mSQL;
     private String mDateTime;
-    private Integer mNoRec;
+    private int mNoRec;
 
     public InfoHandler(Context context) {
+        String lSQL;
+
         mContext = context;
+
         mDB = context.openOrCreateDatabase("InfoDB", context.MODE_PRIVATE, null);
-        Log.d(TAG, "CREATE TABLE IF NOT EXISTS Info(rowid INTEGER PRIMARY KEY, iwhen TEXT, iwhere TEXT, ihow TEXT, iwhat TEXT);");
-        mDB.execSQL("CREATE TABLE IF NOT EXISTS Info(rowid INTEGER PRIMARY KEY, iwhen TEXT, iwhere TEXT, ihow TEXT, iwhat TEXT);");
+
+        lSQL = "CREATE TABLE IF NOT EXISTS Info(rowid INTEGER PRIMARY KEY, iwho TEXT, iwhen TEXT, iwhere TEXT, ihow TEXT, iwhat TEXT, iwhy);";
+//        lSQL = "DROP TABLE Info;";
+        Log.d(TAG, lSQL);
+        mDB.execSQL(lSQL);
     }
 
-    public Boolean insertInfo (String iwhen, String iwhere, String ihow, String iwhat) {
-        Log.d(TAG, "INSERT INTO Info(iwhen, iwhere, ihow, iwhat) VALUES('" + iwhen + "','" + iwhere + "','" + ihow + "','" + iwhat + "');");
-        mDB.execSQL("INSERT INTO Info(iwhen, iwhere, ihow, iwhat) VALUES('" + iwhen + "','" + iwhere + "','" + ihow + "','" + iwhat + "');");
-        return true;
+    public long insertInfo(String iwho, String iwhen, String iwhere, String ihow, String iwhat, String iwhy) {
+        String lSQL;
+
+        lSQL = "INSERT INTO Info(iwho, iwhen, iwhere, ihow, iwhat, iwhy) VALUES('" + iwho + "','" + iwhen + "','" + iwhere + "','" + ihow + "','" + iwhat + "','" + iwhy + "');";
+        Log.d(TAG, lSQL);
+        mDB.execSQL(lSQL);
+
+        //todo, to return rowid if inserted, to return -1 if failed
+        return 1;
     }
 
-    public Boolean deleteInfo (Integer rowid) {
-        Log.d(TAG,             "SELECT rowid FROM Info WHERE rowid = " + rowid + ";");
-        Cursor c = mDB.rawQuery("SELECT rowid FROM Info WHERE rowid = " + rowid + ";", null);
-        if (c.moveToFirst()) {
-            if (c != null && !c.isClosed()) {
-                c.close();
-            }
-            Log.d(TAG, "DELETE FROM Info WHERE rowid = " + rowid + ";");
-            mDB.execSQL("DELETE FROM Info WHERE rowid = " + rowid + ";");
-            return true;
-        } else {
-            if (c != null && !c.isClosed()) {
-                c.close();
-            }
-            return false;
-        }
+    public int updateInfo(Long rowid, String iwho, String iwhen, String iwhere, String ihow, String iwhat, String iwhy) {
+        String lSQL;
+
+        lSQL = "UPDATE Info SET iwho = '" + iwho + "', iwhen = '" + iwhen + "', iwhere = '" + iwhere + "', ihow = '" + ihow + "', iwhat = '" + iwhat + "', iwhy = '" + iwhy + "' WHERE rowid = " + rowid + ";";
+        Log.d(TAG, lSQL);
+        mDB.execSQL(lSQL);
+
+        //todo, to return number of records deleted, to return 0 if no record deleted, to return -1 if failed
+        return 1;
     }
 
-    public Boolean deleteAllInfo () {
-        Log.d(TAG, "DELETE FROM Info;");
-        mDB.execSQL("DELETE FROM Info;");
-        return true;
+    public int deleteInfo(Long rowid) {
+        String lSQL;
+
+        lSQL = "DELETE FROM Info WHERE rowid = " + rowid + ";";
+        mDB.execSQL("DELETE FROM Info WHERE rowid = " + rowid + ";");
+
+        //todo, to return 1 if successful, to return 0 if no record deleted, to return -1 if failed
+        return 1;
     }
 
-    public Boolean updateInfo (Integer rowid, String iwhen, String iwhere, String ihow, String iwhat) {
-        Log.d(TAG,             "SELECT rowid FROM Info WHERE rowid = " + rowid + ";");
-        Cursor c = mDB.rawQuery("SELECT rowid FROM Info WHERE rowid = " + rowid + ";", null);
-        if (c.moveToFirst()) {
-            Log.d(TAG, "UPDATE Info SET iwhen = '" + iwhen + "', iwhere = '" + iwhere + "', ihow = '" + ihow + "', iwhat = '" + iwhat + "' WHERE rowid = " + rowid + ";");
-            mDB.execSQL("UPDATE Info SET iwhen = '" + iwhen + "', iwhere = '" + iwhere + "', ihow = '" + ihow + "', iwhat = '" + iwhat + "' WHERE rowid = " + rowid + ";");
-            if (c != null && !c.isClosed()) {
-                c.close();
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public Integer openSelectInfo (Integer rowid, String iwhen, String iwhere, String ihow, String iwhat) {
+    public int openSelectInfo(Long rowid, String iwho, String iwhen, String iwhere, String ihow, String iwhat, String iwhy) {
         if (mCursor != null && !mCursor.isClosed()) {
             mCursor.close();
         }
 
-        mSQL = "SELECT rowid, iwhen, iwhere, ihow, iwhat FROM Info WHERE 1 = 1 ";
+        mSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE 1 = 1 ";
         if (rowid != null) {
             mSQL += "AND rowid = " + rowid;
         } else {
+            if (iwho != null) {
+                mSQL += "AND iwho  = '" + iwho + "'";
+            }
             if (iwhen != null) {
-                mSQL += "AND iwhen  = '" + iwhen  + "'";
+                mSQL += "AND iwhen  = '" + iwhen + "'";
             }
             if (iwhere != null) {
                 mSQL += "AND iwhere = '" + iwhere + "'";
             }
             if (ihow != null) {
-                mSQL += "AND ihow   = '" + ihow   + "'";
+                mSQL += "AND ihow   = '" + ihow + "'";
             }
             if (iwhat != null) {
-                mSQL += "AND iwhat  = '" + iwhat  + "'";
+                mSQL += "AND iwhat  = '" + iwhat + "'";
+            }
+            if (iwhy != null) {
+                mSQL += "AND iwhy  = '" + iwhy + "'";
             }
         }
         mSQL += ";";
@@ -108,136 +106,104 @@ public class InfoHandler {
             if (mCursor != null && !mCursor.isClosed()) {
                 mCursor.close();
             }
+
             return 0;
         } else {
+
             return mNoRec;
         }
     }
 
-    public String selectNextInfo () {
+    public String selectNextInfo() {
+        if (mCursor == null || mCursor.isClosed()) {
+            return null;
+        }
+
         if (mCursor.moveToNext()) {
             try {
-                JSONObject mObj = new JSONObject();
-                JSONArray mInfo = new JSONArray();
-                JSONObject mInfoRec = new JSONObject();
-                JSONObject mwhere;
+                JSONObject lObj = new JSONObject();
+                JSONArray lInfo = new JSONArray();
+                JSONObject lInfoRec = new JSONObject();
 
-                mObj.put("sql", mSQL);
-                mObj.put("norec", mNoRec);
-                mObj.put("datetime", mDateTime);
-                mInfoRec.put("position", mCursor.getPosition());
-                mInfoRec.put("rowid",    mCursor.getInt(0));
-                mInfoRec.put("iwhen",    mCursor.getString(1));
-                mInfoRec.put("ihow",     mCursor.getString(3));
-                mInfoRec.put("iwhat",    mCursor.getString(4));
-                mwhere = new JSONObject(mCursor.getString(2));
-                mInfoRec.put("iwhere", mwhere);
-                mInfo.put(mInfoRec);
-                mObj.put("info", mInfo);
-                return mObj.toString();
+                lObj.put("sql", mSQL);
+                lObj.put("norec", mNoRec);
+                lObj.put("datetime", mDateTime);
+                lInfoRec.put("position", mCursor.getPosition());
+                lInfoRec.put("rowid", mCursor.getInt(0));
+                lInfoRec.put("iwho", mCursor.getString(1));
+                lInfoRec.put("iwhen", mCursor.getString(2));
+                lInfoRec.put("iwhere", (new JSONObject(mCursor.getString(3))).toString());
+                lInfoRec.put("ihow", mCursor.getString(4));
+                lInfoRec.put("iwhat", mCursor.getString(5));
+                lInfoRec.put("iwhy", mCursor.getString(6));
+                lInfo.put(lInfoRec);
+                lObj.put("info", lInfo);
+
+                return lObj.toString();
             } catch (JSONException e) {
                 e.printStackTrace();
                 if (mCursor != null && !mCursor.isClosed()) {
                     mCursor.close();
                 }
+
                 return null;
             }
         } else {
             if (mCursor != null && !mCursor.isClosed()) {
                 mCursor.close();
             }
+
             return null;
         }
     }
 
-    public void closeSelectInfo () {
+    public void closeSelectInfo() {
         if (mCursor != null && !mCursor.isClosed()) {
             mCursor.close();
         }
     }
 
-    public String selectAllInfo () {
-        Cursor cursor;
-        String sql;
-        Integer norec;
-        String datetime;
+    public String selectAllInfo() {
+        String lSQL;
 
-        sql = "SELECT rowid, iwhen, iwhere, ihow, iwhat FROM Info ORDER BY iwhen DESC;";
-        datetime = new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date());
+        lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info ORDER BY iwhen DESC;";
 
-        Log.d(TAG, "selectAllInfo, DATE:" + datetime + ", SQL:" + sql);
+        try {
+            JSONObject lObj = new JSONObject();
+            lObj.put("sql", lSQL);
 
-        cursor = mDB.rawQuery(sql, null);
-        norec = cursor.getCount();
-        if (norec == 0) {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
+            return selectInfo(lSQL.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
 
             return null;
-        } else {
-            try {
-                JSONObject mObj = new JSONObject();
-                JSONArray mInfoObj = new JSONArray();
-
-                mObj.put("sql", sql);
-                mObj.put("norec", norec);
-                mObj.put("datetime", datetime);
-                while (cursor.moveToNext()) {
-                    JSONObject mInfoRec = new JSONObject();
-                    JSONObject mwhere;
-                    mInfoRec.put("position", cursor.getPosition());
-                    mInfoRec.put("rowid", cursor.getInt(0));
-                    mInfoRec.put("iwhen", cursor.getString(1));
-                    mInfoRec.put("ihow", cursor.getString(3));
-                    mInfoRec.put("iwhat", cursor.getString(4));
-                    mwhere = new JSONObject(cursor.getString(2)); //position is stored in JSON format.
-                    mInfoRec.put("iwhere", mwhere);
-                    mInfoObj.put(mInfoRec);
-                }
-                mObj.put("info", mInfoObj);
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
-                }
-
-                Log.d(TAG, "selectAllInfo, JSON:" + mObj.toString());
-                return mObj.toString();
-            } catch (JSONException e) {
-                e.printStackTrace();
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
-                }
-
-                return null;
-            }
         }
     }
 
-    public String selectAllInfo (String jsql) {
-        Cursor cursor;
-        String sql;
-        Integer norec;
-        String datetime;
+    public String selectInfo(String jSQL) {
+        // assume the query includes all columns in original sequence. SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info;
+        Cursor lCursor;
+        String lSQL;
+        Integer lNoRec;
+        String lDateTime;
+
+        lDateTime = new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date());
+
+        Log.d(TAG, "selectInfo, DATE:" + lDateTime + ", JSON:" + jSQL);
 
         try {
-            JSONObject mObj = null;
-            mObj = new JSONObject(jsql);
-            sql = mObj.getString("sql");
+            JSONObject mObj;
+            mObj = new JSONObject(jSQL);
+            lSQL = mObj.getString("sql");
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
         }
 
-        datetime = new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date());
-
-        Log.d(TAG, "selectAllInfo(String), DATE:" + datetime + ", JSON:" + jsql);
-
-        cursor = mDB.rawQuery(sql, null);
-        norec = cursor.getCount();
-        if (norec == 0) {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
+        lCursor = mDB.rawQuery(lSQL, null);
+        lNoRec = lCursor.getCount();
+        if (lNoRec == 0) {
+            lCursor.close();
 
             return null;
         } else {
@@ -245,38 +211,52 @@ public class InfoHandler {
                 JSONObject mObj = new JSONObject();
                 JSONArray mInfoObj = new JSONArray();
 
-                mObj.put("sql", sql);
-                mObj.put("norec", norec);
-                mObj.put("datetime", datetime);
-                while (cursor.moveToNext()) {
+                mObj.put("sql", lSQL);
+                mObj.put("norec", lNoRec);
+                mObj.put("datetime", lDateTime);
+                while (lCursor.moveToNext()) {
                     JSONObject mInfoRec = new JSONObject();
-                    JSONObject mwhere;
-                    mInfoRec.put("position", cursor.getPosition());
-                    mInfoRec.put("rowid", cursor.getInt(0));
-                    mInfoRec.put("iwhen", cursor.getString(1));
-                    mInfoRec.put("ihow", cursor.getString(3));
-                    mInfoRec.put("iwhat", cursor.getString(4));
-                    mwhere = new JSONObject(cursor.getString(2)); //position is stored in JSON format.
-                    mInfoRec.put("iwhere", mwhere);
+                    mInfoRec.put("position", lCursor.getPosition());
+                    mInfoRec.put("rowid", lCursor.getInt(0));
+                    mInfoRec.put("iwho", lCursor.getString(1));
+                    mInfoRec.put("iwhen", lCursor.getString(2));
+                    mInfoRec.put("iwhere", (new JSONObject(lCursor.getString(3))).toString());
+                    mInfoRec.put("ihow", lCursor.getString(4));
+                    mInfoRec.put("iwhat", lCursor.getString(5));
+                    mInfoRec.put("iwhy", lCursor.getString(6));
                     mInfoObj.put(mInfoRec);
                 }
+                lCursor.close();
                 mObj.put("info", mInfoObj);
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
-                }
-
                 Log.d(TAG, "selectAllInfo(String), JSON:" + mObj.toString());
 
                 return mObj.toString();
             } catch (JSONException e) {
                 e.printStackTrace();
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
-                }
+                lCursor.close();
 
                 return null;
             }
         }
     }
 
+    public int execSQL(String SQL) {
+
+        Log.d(TAG, SQL);
+        mDB.execSQL(SQL);
+
+        //todo, to return number of records affected, to return 0 if no record deleted, to return -1 if failed
+        return 1;
+    }
+
+    public int truncateInfo() {
+        String lSQL;
+
+        lSQL = "DELETE FROM Info; VACUUM;";
+        Log.d(TAG, lSQL);
+        mDB.execSQL(lSQL);
+
+        //todo, to return number of records truncated, to return -1 if failed
+        return 1;
+    }
 }

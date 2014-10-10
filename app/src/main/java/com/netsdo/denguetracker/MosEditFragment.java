@@ -6,6 +6,8 @@ import com.antistatic.spinnerwheel.OnWheelScrollListener;
 import com.antistatic.spinnerwheel.adapters.AbstractWheelTextAdapter;
 import com.antistatic.spinnerwheel.adapters.ArrayWheelAdapter;
 import com.antistatic.spinnerwheel.adapters.NumericWheelAdapter;
+import com.netsdo.swipe4d.MosEditEvent;
+import com.squareup.otto.Subscribe;
 
 import android.content.Context;
 import android.content.Intent;
@@ -30,9 +32,16 @@ import java.util.Locale;
 public class MosEditFragment extends Fragment {
     private static String TAG = "MosEditFragment";
 
+    private Long mRowID;
+    private MainActivity mParentActivity;
+    private InfoHandler mInfo;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_mos_edit, container, false);
+
+        mParentActivity = (MainActivity) getActivity();
+        mInfo = mParentActivity.mInfo;
 
         final AbstractWheel hours = (AbstractWheel) fragmentView.findViewById(R.id.hour);
         hours.setViewAdapter(new NumericWheelAdapter(this.getActivity(), 0, 23));
@@ -103,7 +112,6 @@ public class MosEditFragment extends Fragment {
         mins.addScrollingListener(scrollListener);
         day.addScrollingListener(scrollListener);
 
-
         return fragmentView;
     }
 
@@ -135,6 +143,11 @@ public class MosEditFragment extends Fragment {
             Log.d(TAG, "setUserVisibleHintFalse");
             onInActive();
         }
+    }
+
+    @Subscribe
+    public void evenMosEdit(MosEditEvent event) {
+        mRowID = event.getrowid();
     }
 
     public void onActive() {
@@ -194,6 +207,10 @@ public class MosEditFragment extends Fragment {
 
             return datetime;
         }
+    }
+
+    public void displayItem() {
+
     }
 
 }

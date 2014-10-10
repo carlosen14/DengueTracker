@@ -79,7 +79,7 @@ public class MainActivity extends FragmentActivity {
 
 	@Subscribe
 	public void onPageChanged(PageChangedEvent event) {
-		mVerticalPager.setPagingEnabled(event.hasVerticalNeighbors());
+		mVerticalPager.setPagingEnabled(event.hasVerticalNeighbors()); //allow vertical scroll if page is Central Page.
 	}
 
 }

@@ -8,8 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.netsdo.swipe4d.EventBus;
-import com.netsdo.swipe4d.VerticalPageInVisibleEvent;
-import com.netsdo.swipe4d.VerticalPageVisibleEvent;
+import com.netsdo.swipe4d.VerticalPagerSwitchedEvent;
 import com.squareup.otto.Subscribe;
 
 public class TempRecFragment extends Fragment {
@@ -48,19 +47,20 @@ public class TempRecFragment extends Fragment {
     }
 
     @Subscribe
-    public void evenInVisible(VerticalPageInVisibleEvent event) {
-        if (event.setInVisible(VPOS)) {
-            Log.d(TAG, "onInVisible");
-            onInActive();
-        };
-    }
-
-    @Subscribe
-    public void evenVisible(VerticalPageVisibleEvent event) {
-        if (event.setVisible(VPOS)) {
-            Log.d(TAG, "onVisible");
-            onActive();
-        };
+    public void evenSwitched(VerticalPagerSwitchedEvent event) {
+        Log.d(TAG, "evenSwitched");
+        switch (event.getEvent(VPOS)) {
+            case -1:
+                onInActive();
+                break;
+            case 0:
+                break;
+            case 1:
+                onActive();
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

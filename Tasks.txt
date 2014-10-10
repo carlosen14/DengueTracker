@@ -1,0 +1,4 @@
+//todo, + record and go back to last fragment user used if user restart the app
+//todo, * fragment handling, test and can set any fragment as default vertical fragment
+//todo, + fever record
+//todo, * optimize the list loading performance

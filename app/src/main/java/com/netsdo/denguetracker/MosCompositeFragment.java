@@ -57,7 +57,7 @@ public class MosCompositeFragment extends Fragment {
 		pages.add(MosBiteFragment.class);
 		pages.add(MosListFragment.class);
         pages.add(MosEditFragment.class);
-		mCentralPageIndex = pages.indexOf(MosBiteFragment.class);
+		mCentralPageIndex = pages.indexOf(MosBiteFragment.class); //default main Fragment
 		mHorizontalPager.setAdapter(new FragmentsClassesPagerAdapter(getChildFragmentManager(), getActivity(), pages));
 	}
 }
