@@ -6,6 +6,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Info {
     private static String TAG = "Info";
 
@@ -17,65 +20,122 @@ public class Info {
     private String iwhat;
     private String iwhy;
 
-    public void setRowid(Long rowid) {
+    public void setrowid(Long rowid) {
         this.rowid = rowid;
     }
 
-    public void setIwho(String iwho) {
+    public void setiwho(String iwho) {
         this.iwho = iwho;
     }
 
-    public void setIwhen(String iwhen) {
+    public void setiwhen(String iwhen) {
         this.iwhen = iwhen;
     }
 
-    public void setIwhere(String iwhere) {
+    public void setiwhere(String iwhere) {
         this.iwhere = iwhere;
     }
 
-    public void setIhow(String ihow) {
+    public void setihow(String ihow) {
         this.ihow = ihow;
     }
 
-    public void setIwhat(String iwhat) {
+    public void setiwhat(String iwhat) {
         this.iwhat = iwhat;
     }
 
-    public void setIwhy(String iwhy) {
+    public void setiwhy(String iwhy) {
         this.iwhy = iwhy;
     }
 
-    public Long getRowid() {
+    public Long getrowid() {
         return rowid;
     }
 
-    public String getIwho() {
+    public String getiwho() {
         return iwho;
     }
 
-    public String getIwhen() {
+    public String getiwhen() {
         return iwhen;
     }
 
-    public String getIwhere() {
+    public String getiwhere() {
         return iwhere;
     }
 
-    public String getIhow() {
+    public String getiwhere(int format) {
+        try {
+            JSONObject lObj = new JSONObject(iwhere);
+            switch (format) {
+                case 1:
+                    return "Latitude: " + lObj.getString("latitude") + ", Longitude: " + lObj.getString("longitude");
+                case 2:
+                    return "Latitude: " + lObj.getString("latitude") + ", Longitude: " + lObj.getString("longitude") + ", Altitude: " + lObj.getString("altitude");
+                default: // return uri geo format, "geo:0,0?q=1.3569602420177331,103.88373221520939(Mosquito Bite on Right Leg)&z=20"
+                    return "geo:0,0?q=" + lObj.getString("latitude") + "," + lObj.getString("longitude") + " (" + getihow(1) + " " + getiwhat(1) + ")&z=20";
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return "No Location Available.";
+        }
+    }
+
+    public String getihow(int format) {
+        // todo, use JSON for transaction from internal code to user readable string
+        String lihow;
+        if (ihow.equals("MosBite")) {
+            lihow = "Mosquito Bite On ";
+        } else {
+            lihow = "Unknown How ";
+        }
+
+        return lihow;
+    }
+
+    public String getiwhat(int format) {
+        String liwhat;
+        if (iwhat.equals("Head")) {
+            liwhat = "Head";
+        } else if (iwhat.equals("Body")) {
+            liwhat = "Body";
+        } else if (iwhat.equals("RightArm")) {
+            liwhat = "Right Arm";
+        } else if (iwhat.equals("RightHand")) {
+            liwhat = "Right Hand";
+        } else if (iwhat.equals("RightLeg")) {
+            liwhat = "Right Leg";
+        } else if (iwhat.equals("RightFoot")) {
+            liwhat = "Right Foot";
+        } else if (iwhat.equals("LeftArm")) {
+            liwhat = "Left Arm";
+        } else if (iwhat.equals("LeftHand")) {
+            liwhat = "Left Hand";
+        } else if (iwhat.equals("LeftLeg")) {
+            liwhat = "Left Leg";
+        } else if (iwhat.equals("LeftFoot")) {
+            liwhat = "Left Foot";
+        } else {
+            liwhat = "Unknown What";
+        }
+
+        return liwhat;
+    }
+
+    public String getihow() {
         return ihow;
     }
 
-    public String getIwhat() {
+    public String getiwhat() {
         return iwhat;
     }
 
-    public String getIwhy() {
+    public String getiwhy() {
         return iwhy;
     }
 
     public boolean setInfo(String jInfo) {
-        Log.d(TAG, "setInfo, jInfo:" + jInfo);
-
         try {
             JSONObject lObj = new JSONObject(jInfo);
             JSONArray lInfoObj = lObj.getJSONArray("info");
@@ -116,8 +176,8 @@ public class Info {
             lInfoRec.put("iwhy", iwhy);
             lInfo.put(lInfoRec);
             lObj.put("info", lInfo);
-
             Log.d(TAG, "getInfo, jInfo:" + lObj.toString());
+
             return lObj.toString();
         } catch (JSONException e) {
             e.printStackTrace();

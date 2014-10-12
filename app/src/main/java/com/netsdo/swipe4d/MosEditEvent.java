@@ -5,13 +5,17 @@ import android.util.Log;
 public class MosEditEvent {
     private static String TAG = "MosEditEvent";
 
-    private Long mRowID = Long.valueOf(0);
+    private Long mrowid = Long.valueOf(0);
 
     public MosEditEvent(Long rowid) {
-        mRowID = rowid;
+        mrowid = rowid;
     }
 
-    public long getrowid() {
-        return mRowID;
+    public void setrowid(Long rowid) {
+        mrowid = rowid;
+    }
+
+    public Long getrowid() {
+        return mrowid;
     }
 }

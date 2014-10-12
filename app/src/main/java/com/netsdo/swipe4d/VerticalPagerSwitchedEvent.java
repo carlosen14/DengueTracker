@@ -18,7 +18,7 @@ public class VerticalPagerSwitchedEvent {
         mNewPage = newPage;
     }
 
-    public int getEvent(int myPage) {
+    public int isSwitched(int myPage) {
         Log.d(TAG, "getEvent, myPage:" + myPage + ", oldPage:" + mOldPage + ", newPage:" + mNewPage);
         if (mOldPage == mNewPage) {
             return NOCHANGE;

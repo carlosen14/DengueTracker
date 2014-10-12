@@ -27,7 +27,7 @@ public class InfoHandler {
 
         mContext = context;
 
-        mDB = context.openOrCreateDatabase("InfoDB", context.MODE_PRIVATE, null);
+        mDB = context.openOrCreateDatabase("InfoDB", Context.MODE_PRIVATE, null);
 
         lSQL = "CREATE TABLE IF NOT EXISTS Info(rowid INTEGER PRIMARY KEY, iwho TEXT, iwhen TEXT, iwhere TEXT, ihow TEXT, iwhat TEXT, iwhy);";
 //        lSQL = "DROP TABLE Info;";
@@ -163,6 +163,23 @@ public class InfoHandler {
         }
     }
 
+    public String selectInfo(Long rowid) {
+        String lSQL;
+
+        lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE rowid = "+ rowid +";";
+
+        try {
+            JSONObject lObj = new JSONObject();
+            lObj.put("sql", lSQL);
+
+            return selectInfo(lObj.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return null;
+        }
+    }
+
     public String selectAllInfo() {
         String lSQL;
 
@@ -172,7 +189,7 @@ public class InfoHandler {
             JSONObject lObj = new JSONObject();
             lObj.put("sql", lSQL);
 
-            return selectInfo(lSQL.toString());
+            return selectInfo(lObj.toString());
         } catch (JSONException e) {
             e.printStackTrace();
 
@@ -214,13 +231,14 @@ public class InfoHandler {
                 mObj.put("sql", lSQL);
                 mObj.put("norec", lNoRec);
                 mObj.put("datetime", lDateTime);
+                Log.d(TAG, "selectAllInfo(String), Partial JSON:" + mObj.toString());
                 while (lCursor.moveToNext()) {
                     JSONObject mInfoRec = new JSONObject();
                     mInfoRec.put("position", lCursor.getPosition());
                     mInfoRec.put("rowid", lCursor.getInt(0));
                     mInfoRec.put("iwho", lCursor.getString(1));
                     mInfoRec.put("iwhen", lCursor.getString(2));
-                    mInfoRec.put("iwhere", (new JSONObject(lCursor.getString(3))).toString());
+                    mInfoRec.put("iwhere", (new JSONObject(lCursor.getString(3))).toString()); // iwhere is in JSON format
                     mInfoRec.put("ihow", lCursor.getString(4));
                     mInfoRec.put("iwhat", lCursor.getString(5));
                     mInfoRec.put("iwhy", lCursor.getString(6));
@@ -228,7 +246,7 @@ public class InfoHandler {
                 }
                 lCursor.close();
                 mObj.put("info", mInfoObj);
-                Log.d(TAG, "selectAllInfo(String), JSON:" + mObj.toString());
+//                Log.d(TAG, "selectAllInfo(String), Full JSON:" + mObj.toString());
 
                 return mObj.toString();
             } catch (JSONException e) {
@@ -238,15 +256,6 @@ public class InfoHandler {
                 return null;
             }
         }
-    }
-
-    public int execSQL(String SQL) {
-
-        Log.d(TAG, SQL);
-        mDB.execSQL(SQL);
-
-        //todo, to return number of records affected, to return 0 if no record deleted, to return -1 if failed
-        return 1;
     }
 
     public int truncateInfo() {

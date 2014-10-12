@@ -40,8 +40,8 @@ public class FragmentsClassesPagerAdapter extends FragmentPagerAdapter {
 	//
 	// -----------------------------------------------------------------------
 	@Override
-	public Fragment getItem(int posiiton) {
-		return Fragment.instantiate(mContext, mPagesClasses.get(posiiton).getName());
+	public Fragment getItem(int position) {
+		return Fragment.instantiate(mContext, mPagesClasses.get(position).getName());
 	}
 
 	@Override

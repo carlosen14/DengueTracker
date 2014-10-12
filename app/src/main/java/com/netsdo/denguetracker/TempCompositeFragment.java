@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,22 +37,20 @@ public class TempCompositeFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View fragmentView = inflater.inflate(R.layout.fragment_composite_temp, container, false);
-		findViews(fragmentView);
+        mHorizontalPager = (ViewPager) fragmentView.findViewById(R.id.fragment_composite_temp_pager);
+
+        initViews();
+
 		return fragmentView;
 	}
 
-	private void findViews(View fragmentView) {
-		mHorizontalPager = (ViewPager) fragmentView.findViewById(R.id.fragment_composite_temp_pager);
-		initViews();
-	}
-
 	private void initViews() {
-		populateHozizontalPager();
+		populateHorizontalPager();
 		mHorizontalPager.setCurrentItem(mCentralPageIndex);
 		mHorizontalPager.setOnPageChangeListener(mPagerChangeListener);
 	}
 
-	private void populateHozizontalPager() {
+	private void populateHorizontalPager() {
 		ArrayList<Class<? extends Fragment>> pages = new ArrayList<Class<? extends Fragment>>();
 		pages.add(TempRecFragment.class);
 		pages.add(TempListFragment.class);

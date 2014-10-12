@@ -14,31 +14,35 @@
         android:textSize="14sp" />
 
     <Button
-        android:id="@+id/positiona"
+        android:id="@+id/delete"
         android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_below="@+id/msg"
-        android:hint="Button"/>
+        android:hint="delete"/>
+
+    <Button
+        android:id="@+id/iwhere"
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_below="@+id/delete"
+        android:hint="iwhere"/>
+
+    <TextView
+        android:id="@+id/rowid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:hint="1234" />
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center"
-        android:orientation="vertical">
-
-        <com.antistatic.spinnerwheel.WheelVerticalView
-            android:id="@+id/hour"
-            app:selectionDivider="@drawable/divider_dark_gradient_horizontal"
-            android:layout_height="wrap_content"
-            android:layout_width="50dp" />
-
-        <com.antistatic.spinnerwheel.WheelVerticalView
-            android:id="@+id/mins"
-            app:selectionDivider="@drawable/divider_dark_gradient_horizontal"
-            android:layout_height="wrap_content"
-            android:layout_width="50dp" />
+        android:orientation="horizontal">
 
         <com.antistatic.spinnerwheel.WheelVerticalView
             android:id="@+id/day"
@@ -49,6 +53,18 @@
             app:selectionDividerDimmedAlpha="255"
             app:selectionDividerHeight="1px"
             app:visibleItems="4" />
+
+        <com.antistatic.spinnerwheel.WheelVerticalView
+            android:id="@+id/hour"
+            app:selectionDivider="@drawable/divider_dark_gradient_horizontal"
+            android:layout_height="wrap_content"
+            android:layout_width="50dp" />
+
+        <com.antistatic.spinnerwheel.WheelVerticalView
+            android:id="@+id/min"
+            app:selectionDivider="@drawable/divider_dark_gradient_horizontal"
+            android:layout_height="wrap_content"
+            android:layout_width="50dp" />
 
         <com.antistatic.spinnerwheel.WheelVerticalView
             android:id="@+id/iwhat"

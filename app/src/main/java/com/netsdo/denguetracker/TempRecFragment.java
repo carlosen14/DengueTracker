@@ -15,14 +15,14 @@ public class TempRecFragment extends Fragment {
     private static String TAG = "TempRecFragment";
     private static int VPOS = 1; //VerticalPage Position, for main Fragment only, should be sync with position in activity_main.xml
 
-    private MainActivity parentActivity;
-    private InfoHandler mInfo;
+    private MainActivity mParentActivity;
+    private InfoHandler mInfoHandler;
 
     @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View fragmentView = inflater.inflate(R.layout.fragment_temp_rec, container, false);
-        parentActivity = (MainActivity) getActivity();
-        mInfo = parentActivity.mInfo;
+        mParentActivity = (MainActivity) getActivity();
+        mInfoHandler = mParentActivity.mInfoHandler;
 
 		return fragmentView;
 	}
@@ -47,9 +47,9 @@ public class TempRecFragment extends Fragment {
     }
 
     @Subscribe
-    public void evenSwitched(VerticalPagerSwitchedEvent event) {
+    public void eventSwitched(VerticalPagerSwitchedEvent event) {
         Log.d(TAG, "evenSwitched");
-        switch (event.getEvent(VPOS)) {
+        switch (event.isSwitched(VPOS)) {
             case -1:
                 onInActive();
                 break;
@@ -68,11 +68,11 @@ public class TempRecFragment extends Fragment {
         super.setUserVisibleHint(isVisibleToUser);
 
         if (isVisibleToUser) {
-            Log.d(TAG, "setUserVisibleHintTrue");
+            Log.d(TAG, "setUserVisibleHint, True");
             onActive();
         }
         else {
-            Log.d(TAG, "setUserVisibleHintFalse");
+            Log.d(TAG, "setUserVisibleHint, False");
             onInActive();
         }
     }

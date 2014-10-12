@@ -223,34 +223,34 @@ public class BestLocationProvider {
 
 	public String locationToString(Location l) {
         try {
-            JSONObject mObj = new JSONObject();
+            JSONObject lObj = new JSONObject();
             if (l == null) {
-                mObj.put("longitude", 0);
-                mObj.put("latitude", 0);
-                mObj.put("altitude", 0);
-                mObj.put("speed", 0);
-                mObj.put("bearing", 0);
-                mObj.put("accuracy", 0);
-                mObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date()));
-                mObj.put("provider", "null");
-                mObj.put("elapsedrealtimenanos", 0);
-                mObj.put("extras", "null");
+                lObj.put("longitude", 0);
+                lObj.put("latitude", 0);
+                lObj.put("altitude", 0);
+                lObj.put("speed", 0);
+                lObj.put("bearing", 0);
+                lObj.put("accuracy", 0);
+                lObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date()));
+                lObj.put("provider", "null");
+                lObj.put("elapsedrealtimenanos", 0);
+                lObj.put("extras", "null");
             } else {
-                mObj.put("longitude", l.getLongitude());
-                mObj.put("latitude", l.getLatitude());
-                mObj.put("altitude", l.getAltitude());
-                mObj.put("speed", l.getSpeed());
-                mObj.put("bearing", l.getBearing());
-                mObj.put("accuracy", l.getAccuracy());
-                mObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(l.getTime()));
-                mObj.put("provider", l.getProvider());
+                lObj.put("longitude", l.getLongitude());
+                lObj.put("latitude", l.getLatitude());
+                lObj.put("altitude", l.getAltitude());
+                lObj.put("speed", l.getSpeed());
+                lObj.put("bearing", l.getBearing());
+                lObj.put("accuracy", l.getAccuracy());
+                lObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(l.getTime()));
+                lObj.put("provider", l.getProvider());
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    mObj.put("elapsedrealtimenanos", l.getElapsedRealtimeNanos());
+                    lObj.put("elapsedrealtimenanos", l.getElapsedRealtimeNanos());
                 }
-                mObj.put("extras", l.getExtras());
+                lObj.put("extras", l.getExtras());
             }
 
-            return mObj.toString();
+            return lObj.toString();
         } catch (JSONException e) {
             e.printStackTrace();
 

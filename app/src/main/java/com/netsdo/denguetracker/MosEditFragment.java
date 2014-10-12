@@ -1,11 +1,11 @@
 package com.netsdo.denguetracker;
 
 import com.antistatic.spinnerwheel.AbstractWheel;
-import com.antistatic.spinnerwheel.OnWheelChangedListener;
 import com.antistatic.spinnerwheel.OnWheelScrollListener;
 import com.antistatic.spinnerwheel.adapters.AbstractWheelTextAdapter;
 import com.antistatic.spinnerwheel.adapters.ArrayWheelAdapter;
 import com.antistatic.spinnerwheel.adapters.NumericWheelAdapter;
+import com.netsdo.swipe4d.EventBus;
 import com.netsdo.swipe4d.MosEditEvent;
 import com.squareup.otto.Subscribe;
 
@@ -19,11 +19,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,131 +32,69 @@ import java.util.Locale;
 public class MosEditFragment extends Fragment {
     private static String TAG = "MosEditFragment";
 
-    private Long mRowID;
     private MainActivity mParentActivity;
-    private InfoHandler mInfo;
+    private InfoHandler mInfoHandler;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View fragmentView = inflater.inflate(R.layout.fragment_mos_edit, container, false);
+    private Info mInfo;
 
-        mParentActivity = (MainActivity) getActivity();
-        mInfo = mParentActivity.mInfo;
+    private Long mrowid;
 
-        final AbstractWheel hours = (AbstractWheel) fragmentView.findViewById(R.id.hour);
-        hours.setViewAdapter(new NumericWheelAdapter(this.getActivity(), 0, 23));
-        hours.setCyclic(true);
+    private DayArrayAdapter mDayAdapter;
+    private Calendar mCalendar;
+    private ArrayWheelAdapter<String> miwhatAdapter;
 
-        final AbstractWheel mins = (AbstractWheel) fragmentView.findViewById(R.id.mins);
-        mins.setViewAdapter(new NumericWheelAdapter(this.getActivity(), 0, 59, "%02d"));
-        mins.setCyclic(true);
+    private TextView mrowidHolder;
+    private AbstractWheel mDayHolder;
+    private AbstractWheel mHourHolder;
+    private AbstractWheel mMinHolder;
+    private AbstractWheel miwhatHolder;
 
-        final AbstractWheel iwhat = (AbstractWheel) fragmentView.findViewById(R.id.iwhat);
-        ArrayWheelAdapter<String> iwhatAdapter = new ArrayWheelAdapter<String>(this.getActivity(), new String[]{"Head", "Body", "RightArm", "RightHand", "RightLeg", "RightFoot", "LeftArm", "LeftHand", "LeftLeg", "LeftFoot"});
-        iwhatAdapter.setItemResource(R.layout.wheel_text_centered);
-        iwhatAdapter.setItemTextResource(R.id.text);
-        iwhat.setViewAdapter(iwhatAdapter);
-
-        // set current time
-        Calendar calendar = Calendar.getInstance(Locale.getDefault());
-        hours.setCurrentItem(calendar.get(Calendar.HOUR_OF_DAY));
-        mins.setCurrentItem(calendar.get(Calendar.MINUTE));
-        iwhat.setCurrentItem(calendar.get(Calendar.AM_PM));
-
-        final AbstractWheel day = (AbstractWheel) fragmentView.findViewById(R.id.day);
-        calendar.add(Calendar.DATE, -3);
-        final DayArrayAdapter dayAdapter = new DayArrayAdapter(this.getActivity(), calendar);
-        day.setViewAdapter(dayAdapter);
-        day.setCurrentItem(dayAdapter.getToday());
-
-        View.OnClickListener buttonListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String biteOn;
-                switch (v.getId()) {
-                    case R.id.positiona:
-                        Uri geoLocation = Uri.parse("geo:0,0?q=1.3569602420177331,103.88373221520939(Mosquito Bite on Right Leg)&z=20");
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(geoLocation);
-                        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                            startActivity(intent);
-                        }
-                        biteOn = "positiona";
-                        break;
-                    default:
-                        biteOn = "Unknown";
-                }
-                Log.d(TAG, "onClick, " + biteOn);
+    View.OnClickListener mClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            String clickOn;
+            switch (v.getId()) {
+                case R.id.iwhere:
+//                    Uri geoLocation = Uri.parse("geo:0,0?q=1.3569602420177331,103.88373221520939(Mosquito Bite on Right Leg)&z=20");
+                    Uri geoLocation = Uri.parse(mInfo.getiwhere(4));
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(geoLocation);
+                    if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+                    clickOn = "iwhere";
+                    break;
+                default:
+                    clickOn = "Unknown";
             }
-        };
-        Button posbutton = (Button) fragmentView.findViewById(R.id.positiona);
-        posbutton.setOnClickListener(buttonListener);
-
-        OnWheelScrollListener scrollListener = new OnWheelScrollListener() {
-            public void onScrollingStarted(AbstractWheel wheel) {
-                //
-            }
-
-            public void onScrollingFinished(AbstractWheel wheel) {
-                switch (wheel.getId()){
-                    case R.id.hour :
-                        Toast.makeText(wheel.getContext(), "Hour:" + hours.getCurrentItem() + ":" + mins.getCurrentItem(), Toast.LENGTH_SHORT).show();
-                    case R.id.mins :
-                        Toast.makeText(wheel.getContext(), "min:" + hours.getCurrentItem() + ":" + mins.getCurrentItem(), Toast.LENGTH_SHORT).show();
-                    case R.id.day :
-                        Toast.makeText(wheel.getContext(), "day:" + dayAdapter.getItemText(day.getCurrentItem()), Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
-        hours.addScrollingListener(scrollListener);
-        mins.addScrollingListener(scrollListener);
-        day.addScrollingListener(scrollListener);
-
-        return fragmentView;
-    }
-
-    @Override
-    public void onResume() {
-        Log.d(TAG, "onResume");
-        super.onResume();
-
-        onActive();
-    }
-
-    @Override
-    public void onPause() {
-        Log.d(TAG, "onPause");
-
-        onInActive();
-
-        super.onPause();
-    }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-
-        if (isVisibleToUser) {
-            Log.d(TAG, "setUserVisibleHintTrue");
-            onActive();
-        } else {
-            Log.d(TAG, "setUserVisibleHintFalse");
-            onInActive();
+            Log.d(TAG, "onClick, " + clickOn);
         }
-    }
+    };
 
-    @Subscribe
-    public void evenMosEdit(MosEditEvent event) {
-        mRowID = event.getrowid();
-    }
+    OnWheelScrollListener mScrollListener = new OnWheelScrollListener() {
+        public void onScrollingStarted(AbstractWheel wheel) {
+            // not handle the event
+        }
 
-    public void onActive() {
-        Log.d(TAG, "onActive");
-    }
-
-    public void onInActive() {
-        Log.d(TAG, "onInActive");
-    }
+        public void onScrollingFinished(AbstractWheel wheel) {
+            switch (wheel.getId()) {
+                case R.id.hour:
+                    Toast.makeText(wheel.getContext(), "hour:" + mHourHolder.getCurrentItem() + ":" + mMinHolder.getCurrentItem(), Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.min:
+                    Toast.makeText(wheel.getContext(), "mMinHolder:" + mHourHolder.getCurrentItem() + ":" + mMinHolder.getCurrentItem(), Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.day:
+                    Toast.makeText(wheel.getContext(), "mDayHolder:" + mDayAdapter.getItemText(mDayHolder.getCurrentItem()), Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.iwhat:
+                    Toast.makeText(wheel.getContext(), "iwhat:" + miwhatAdapter.getItemText(miwhatHolder.getCurrentItem()), Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     private class DayArrayAdapter extends AbstractWheelTextAdapter {
         private final int daysCount = 20; // show date back to 3 weeks before
@@ -166,8 +104,8 @@ public class MosEditFragment extends Fragment {
 
         protected DayArrayAdapter(Context context, Calendar calendar) {
             super(context, R.layout.time_picker_custom_day, NO_RESOURCE);
-            this.calendar = calendar;
 
+            this.calendar = calendar;
             setItemTextResource(R.id.time2_monthday);
         }
 
@@ -203,14 +141,146 @@ public class MosEditFragment extends Fragment {
         protected CharSequence getItemText(int index) {
             Calendar lcalendar = (Calendar) calendar.clone();
             lcalendar.add(Calendar.DATE, -daysCount + index);
-            String datetime = new SimpleDateFormat(context.getString(R.string.iso6301)).format(lcalendar.getTime());
 
-            return datetime;
+            return new SimpleDateFormat(context.getString(R.string.iso6301)).format(lcalendar.getTime());
         }
     }
 
-    public void displayItem() {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View fragmentView = inflater.inflate(R.layout.fragment_mos_edit, container, false);
 
+        mParentActivity = (MainActivity) getActivity();
+        mInfoHandler = mParentActivity.mInfoHandler;
+        mInfo = new Info();
+
+        mHourHolder = (AbstractWheel) fragmentView.findViewById(R.id.hour);
+        mHourHolder.setViewAdapter(new NumericWheelAdapter(this.getActivity(), 0, 23, "%02d"));
+        mHourHolder.setCyclic(true);
+
+        mMinHolder = (AbstractWheel) fragmentView.findViewById(R.id.min);
+        mMinHolder.setViewAdapter(new NumericWheelAdapter(this.getActivity(), 0, 59, "%02d"));
+        mMinHolder.setCyclic(true);
+
+        miwhatHolder = (AbstractWheel) fragmentView.findViewById(R.id.iwhat);
+        miwhatAdapter = new ArrayWheelAdapter<String>(this.getActivity(), new String[]{"Head", "Body", "RightArm", "RightHand", "RightLeg", "RightFoot", "LeftArm", "LeftHand", "LeftLeg", "LeftFoot"});
+        miwhatAdapter.setItemResource(R.layout.wheel_text_centered);
+        miwhatAdapter.setItemTextResource(R.id.text);
+        miwhatHolder.setViewAdapter(miwhatAdapter);
+
+        // set current time
+        mCalendar = Calendar.getInstance(Locale.getDefault());
+
+        mDayHolder = (AbstractWheel) fragmentView.findViewById(R.id.day);
+        mDayAdapter = new DayArrayAdapter(this.getActivity(), mCalendar);
+        mDayHolder.setViewAdapter(mDayAdapter);
+
+        mrowidHolder = (TextView) fragmentView.findViewById(R.id.rowid);
+
+        Button liwhereButton = (Button) fragmentView.findViewById(R.id.iwhere);
+        Button lDeleteButton = (Button) fragmentView.findViewById(R.id.delete);
+
+        liwhereButton.setOnClickListener(mClickListener);
+        lDeleteButton.setOnClickListener(mClickListener);
+
+        mHourHolder.addScrollingListener(mScrollListener);
+        mMinHolder.addScrollingListener(mScrollListener);
+        mDayHolder.addScrollingListener(mScrollListener);
+        miwhatHolder.addScrollingListener(mScrollListener);
+
+        return fragmentView;
     }
 
+    @Override
+    public void onResume() {
+        Log.d(TAG, "onResume");
+        super.onResume();
+
+        EventBus.getInstance().register(this);
+        onActive();
+    }
+
+    @Override
+    public void onPause() {
+        Log.d(TAG, "onPause");
+
+        EventBus.getInstance().unregister(this);
+        onInActive();
+
+        super.onPause();
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (isVisibleToUser) {
+            Log.d(TAG, "setUserVisibleHintTrue");
+            onActive();
+        } else {
+            Log.d(TAG, "setUserVisibleHintFalse");
+            onInActive();
+        }
+    }
+
+    public void onActive() {
+        Log.d(TAG, "onActive");
+
+        if (loadInfo()) {
+            showInfo();
+        }
+    }
+
+    public void onInActive() {
+        Log.d(TAG, "onInActive");
+    }
+
+    @Subscribe
+    public void eventMosEdit(MosEditEvent event) {
+        Log.d(TAG, "eventMosEdit, event:" + event.getrowid());
+        mrowid = event.getrowid();
+    }
+
+    private boolean loadInfo() {
+        // return true if data is loaded
+        // return false if data is not loaded
+        String lInfo;
+
+        if (mrowid == null) {
+            return false; // no data
+        }
+
+        lInfo = mInfoHandler.selectInfo(mrowid);
+        if (lInfo == null) {
+            return false; // no data
+        }
+
+        mInfo.setInfo(lInfo);
+
+        SimpleDateFormat lFormat = new SimpleDateFormat(mParentActivity.getString(R.string.iso6301));
+        Date lDate;
+        try {
+            lDate = lFormat.parse(mInfo.getiwhen());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false; // iwhen is wrong, no data to show
+        }
+        mCalendar.setTime(lDate);
+
+
+        return true; // data is loaded
+    }
+
+    private boolean showInfo() {
+        // 0123456789  0  1234567890123
+        // yyyy-MM-dd\'T\'HH:mm:ss.SSSZ
+        mrowidHolder.setText(mInfo.getrowid().toString());
+        miwhatHolder.setCurrentItem(2); // todo, to map string into number
+        mDayAdapter.notifyDataChangedEvent();
+        mDayHolder.setCurrentItem(20); // hardcode, todo
+        mHourHolder.setCurrentItem(Integer.parseInt(mInfo.getiwhen().substring(11, 13)));
+        mMinHolder.setCurrentItem(Integer.parseInt(mInfo.getiwhen().substring(14, 16)));
+
+        return true;
+    }
 }

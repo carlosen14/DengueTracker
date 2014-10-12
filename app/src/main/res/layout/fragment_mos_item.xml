@@ -6,10 +6,8 @@
     android:id="@+id/bite_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
     android:gravity="center_horizontal|top"
-    android:orientation="vertical"
-    android:weightSum="1">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,20 +20,20 @@
             android:id="@+id/rowid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|start|center_vertical"
+            android:layout_gravity="start|center_vertical"
             android:hint="1234" />
 
         <TextView
             android:id="@+id/iwho"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|start|center_vertical" />
+            android:layout_gravity="start|center_vertical" />
 
         <TextView
             android:id="@+id/iwhy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|start|center_vertical" />
+            android:layout_gravity="start|center_vertical" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -47,14 +45,14 @@
                 android:id="@+id/ihow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left|start|center_vertical"
+                android:layout_gravity="start|center_vertical"
                 android:hint="Mosquito Bite On " />
 
             <TextView
                 android:id="@+id/iwhat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left|start|center"
+                android:layout_gravity="start|center"
                 android:hint="RightHand" />
         </LinearLayout>
 

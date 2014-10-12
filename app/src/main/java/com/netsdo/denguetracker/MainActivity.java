@@ -4,8 +4,6 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
-import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import com.netsdo.swipe4d.EventBus;
@@ -14,72 +12,67 @@ import com.netsdo.swipe4d.VerticalPager;
 import com.squareup.otto.Subscribe;
 
 public class MainActivity extends FragmentActivity {
-
     private static String TAG = "MainActivity";
 
-	private static final int START_PAGE_INDEX = 0;
+    private static final int START_PAGE_INDEX = 0;
 
-	private VerticalPager mVerticalPager;
+    public InfoHandler mInfoHandler;
 
-    public InfoHandler mInfo;
+    private VerticalPager mVerticalPager;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		findViews();
-        mInfo = new InfoHandler(this);
-	}
+    OnGlobalLayoutListener mLayoutListener = new OnGlobalLayoutListener() {
+        @SuppressWarnings("deprecation")
+        @Override
+        public void onGlobalLayout() {
+            mVerticalPager.snapToPage(START_PAGE_INDEX, VerticalPager.PAGE_SNAP_DURATION_INSTANT);
 
-	private void findViews() {
-		mVerticalPager = (VerticalPager) findViewById(R.id.activity_main_vertical_pager);
-		initViews();
-	}
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
+                // recommended removeOnGlobalLayoutListener method is available since API 16 only
+                mVerticalPager.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+            else
+                removeGlobalOnLayoutListenerForJellyBean();
+        }
 
-	private void initViews() {
-        snapPageWhenLayoutIsReady(mVerticalPager, START_PAGE_INDEX);
-	}
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+        private void removeGlobalOnLayoutListenerForJellyBean() {
+            mVerticalPager.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        }
+    };
 
-	private void snapPageWhenLayoutIsReady(final View pageView, final int page) {
-		/*
-		 * VerticalPager is not fully initialized at the moment, so we want to snap to the central page only when it
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        mVerticalPager = (VerticalPager) findViewById(R.id.activity_main_vertical_pager);
+
+        mInfoHandler = new InfoHandler(this);
+
+        initViews();
+    }
+
+    private void initViews() {
+        /*
+         * VerticalPager is not fully initialized at the moment, so we want to snap to the central page only when it
 		 * layout and measure all its pages.
 		 */
-		pageView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-			@SuppressWarnings("deprecation")
-			@Override
-			public void onGlobalLayout() {
-				mVerticalPager.snapToPage(page, VerticalPager.PAGE_SNAP_DURATION_INSTANT);
+        mVerticalPager.getViewTreeObserver().addOnGlobalLayoutListener(mLayoutListener);
+    }
 
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
-					// recommended removeOnGlobalLayoutListener method is available since API 16 only
-					pageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-				else
-					removeGlobalOnLayoutListenerForJellyBean(pageView);
-			}
+    @Override
+    protected void onResume() {
+        super.onResume();
+        EventBus.getInstance().register(this);
+    }
 
-			@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-			private void removeGlobalOnLayoutListenerForJellyBean(final View pageView) {
-				pageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-			}
-		});
-	}
+    @Override
+    protected void onPause() {
+        EventBus.getInstance().unregister(this);
+        super.onPause();
+    }
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		EventBus.getInstance().register(this);
-	}
-
-	@Override
-	protected void onPause() {
-		EventBus.getInstance().unregister(this);
-		super.onPause();
-	}
-
-	@Subscribe
-	public void onPageChanged(PageChangedEvent event) {
-		mVerticalPager.setPagingEnabled(event.hasVerticalNeighbors()); //allow vertical scroll if page is Central Page.
-	}
-
+    @Subscribe
+    public void eventPageChanged(PageChangedEvent event) {
+//        Log.d(TAG, "onPageChanged, hasVerticalNeighbors:" + event.hasVerticalNeighbors());
+        mVerticalPager.setPagingEnabled(event.hasVerticalNeighbors()); //allow vertical scroll only if the page is Central Page.
+    }
 }

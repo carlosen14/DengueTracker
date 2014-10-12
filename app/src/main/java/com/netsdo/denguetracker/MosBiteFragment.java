@@ -27,76 +27,75 @@ public class MosBiteFragment extends Fragment {
     private BestLocationProvider mBestLocationProvider;
     private BestLocationListener mBestLocationListener;
     private MainActivity mParentActivity;
-    private InfoHandler mInfo;
+    private InfoHandler mInfoHandler;
 
+    View.OnClickListener mClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            String lBiteOn;
+            switch (v.getId()) {
+                case R.id.hbutton:
+                    lBiteOn = "Head";
+                    break;
+                case R.id.bbutton:
+                    lBiteOn = "Body";
+                    break;
+                case R.id.rabutton:
+                    lBiteOn = "RightArm";
+                    break;
+                case R.id.rhbutton:
+                    lBiteOn = "RightHand";
+                    mInfoHandler.truncateInfo();  // for testing purpose, to be removed before final release.
+                    break;
+                case R.id.rlbutton:
+                    lBiteOn = "RightLeg";
+                    break;
+                case R.id.rfbutton:
+                    lBiteOn = "RightFoot";
+                    break;
+                case R.id.labutton:
+                    lBiteOn = "LeftArm";
+                    break;
+                case R.id.lhbutton:
+                    lBiteOn = "LeftHand";
+                    Integer norec = mInfoHandler.openSelectInfo(null, null, null, null, null, null, null); // for testing purpose, to be removed before final release.
+                    if (norec != 0) {
+                        String lInfo = mInfoHandler.selectNextInfo();
+                        while (lInfo != null) {
+                            Log.d(TAG, lInfo);
+                            lInfo = mInfoHandler.selectNextInfo();
+                        }
+                    } else {
+                        Log.i(TAG, "no record of Info found.");
+                    }
+                    break;
+                case R.id.llbutton:
+                    lBiteOn = "LeftLeg";
+                    break;
+                case R.id.lfbutton:
+                    lBiteOn = "LeftFoot";
+                    break;
+                default:
+                    lBiteOn = "Unknown";
+            }
+            Toast.makeText(v.getContext(), "Mosquito Bite On " + lBiteOn, Toast.LENGTH_SHORT).show();
+            Log.i(TAG, lBiteOn + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
+            long mosBite = mInfoHandler.insertInfo(
+                    null, //iwho
+                    new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()), // iwhen
+                    mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), //iwhere
+                    "MosBite", //ihow
+                    lBiteOn, //iwhat
+                    null); // iwhy
+
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_mos_bite, container, false);
         mParentActivity = (MainActivity) getActivity();
-        mInfo = mParentActivity.mInfo;
-
-        View.OnClickListener buttonListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String lBiteOn;
-                switch (v.getId()) {
-                    case R.id.hbutton:
-                        lBiteOn = "Head";
-                        break;
-                    case R.id.bbutton:
-                        lBiteOn = "Body";
-                        break;
-                    case R.id.rabutton:
-                        lBiteOn = "RightArm";
-                        break;
-                    case R.id.rhbutton:
-                        lBiteOn = "RightHand";
-                        mInfo.truncateInfo();  // for testing purpose, to be removed before final release.
-                        break;
-                    case R.id.rlbutton:
-                        lBiteOn = "RightLeg";
-                        break;
-                    case R.id.rfbutton:
-                        lBiteOn = "RightFoot";
-                        break;
-                    case R.id.labutton:
-                        lBiteOn = "LeftArm";
-                        break;
-                    case R.id.lhbutton:
-                        lBiteOn = "LeftHand";
-                        Integer norec = mInfo.openSelectInfo(null, null, null, null, null, null, null); // for testing purpose, to be removed before final release.
-                        if (norec != 0) {
-                            String lInfo = mInfo.selectNextInfo();
-                            while (lInfo != null) {
-                                Log.d(TAG, lInfo);
-                                lInfo = mInfo.selectNextInfo();
-                            }
-                        } else {
-                            Log.i(TAG, "no record of Info found.");
-                        }
-                        break;
-                    case R.id.llbutton:
-                        lBiteOn = "LeftLeg";
-                        break;
-                    case R.id.lfbutton:
-                        lBiteOn = "LeftFoot";
-                        break;
-                    default:
-                        lBiteOn = "Unknown";
-                }
-                Toast.makeText(v.getContext(), "Mosquito Bite On " + lBiteOn, Toast.LENGTH_SHORT).show();
-                Log.i(TAG, lBiteOn + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
-                long mosBite = mInfo.insertInfo(
-                        null, //iwho
-                        new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()), // iwhen
-                        mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), //iwhere
-                        "MosBite", //ihow
-                        lBiteOn, //iwhat
-                        null); // iwhy
-
-            }
-        };
+        mInfoHandler = mParentActivity.mInfoHandler;
 
         ImageView hbutton = (ImageView) fragmentView.findViewById(R.id.hbutton);
         ImageView bbutton = (ImageView) fragmentView.findViewById(R.id.bbutton);
@@ -108,16 +107,16 @@ public class MosBiteFragment extends Fragment {
         ImageView lhbutton = (ImageView) fragmentView.findViewById(R.id.lhbutton);
         ImageView llbutton = (ImageView) fragmentView.findViewById(R.id.llbutton);
         ImageView lfbutton = (ImageView) fragmentView.findViewById(R.id.lfbutton);
-        hbutton.setOnClickListener(buttonListener);
-        bbutton.setOnClickListener(buttonListener);
-        rabutton.setOnClickListener(buttonListener);
-        rhbutton.setOnClickListener(buttonListener);
-        rlbutton.setOnClickListener(buttonListener);
-        rfbutton.setOnClickListener(buttonListener);
-        labutton.setOnClickListener(buttonListener);
-        lhbutton.setOnClickListener(buttonListener);
-        llbutton.setOnClickListener(buttonListener);
-        lfbutton.setOnClickListener(buttonListener);
+        hbutton.setOnClickListener(mClickListener);
+        bbutton.setOnClickListener(mClickListener);
+        rabutton.setOnClickListener(mClickListener);
+        rhbutton.setOnClickListener(mClickListener);
+        rlbutton.setOnClickListener(mClickListener);
+        rfbutton.setOnClickListener(mClickListener);
+        labutton.setOnClickListener(mClickListener);
+        lhbutton.setOnClickListener(mClickListener);
+        llbutton.setOnClickListener(mClickListener);
+        lfbutton.setOnClickListener(mClickListener);
 
         return fragmentView;
     }
@@ -142,9 +141,9 @@ public class MosBiteFragment extends Fragment {
     }
 
     @Subscribe
-    public void evenSwitched(VerticalPagerSwitchedEvent event) {
+    public void eventSwitched(VerticalPagerSwitchedEvent event) {
         Log.d(TAG, "evenSwitched");
-        switch (event.getEvent(VPOS)) {
+        switch (event.isSwitched(VPOS)) {
             case -1:
                 onInActive();
                 break;
