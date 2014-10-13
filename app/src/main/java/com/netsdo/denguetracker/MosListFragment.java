@@ -175,12 +175,10 @@ public class MosListFragment extends Fragment {
     public void onActive() {
         Log.d(TAG, "onActive");
 
-        EventBus.getInstance().post(new PageChangedEvent(false)); // shortcut to prevent vertical scroll if the fragment is not main page and active at beginning. todo,
-        EventBus.getInstance().post(new MosEditEvent(mInfoArray.get(0).getrowid())); // hardcode to pass first record to edit page to load as default, todo
-
         if (loadInfo()) {
-            mAdapter.notifyDataSetChanged(); // refresh screen after new data is loaded.
+            showInfo();
         }
+        EventBus.getInstance().post(new PageChangedEvent(false)); // shortcut to prevent vertical scroll if the fragment is not main page and active at beginning (onPageSelected is not called at this scenario). todo,
     }
 
     public void onInActive() {
@@ -237,5 +235,12 @@ public class MosListFragment extends Fragment {
         }
 
         return true; // data is changed.
+    }
+
+    private  boolean showInfo () {
+        mAdapter.notifyDataSetChanged(); // refresh screen after new data is loaded.
+        EventBus.getInstance().post(new MosEditEvent(mInfoArray.get(0).getrowid())); // hardcode to pass first record to edit page to load as default, todo
+
+        return true;
     }
 }

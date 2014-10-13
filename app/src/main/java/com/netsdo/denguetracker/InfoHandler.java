@@ -53,7 +53,7 @@ public class InfoHandler {
         Log.d(TAG, lSQL);
         mDB.execSQL(lSQL);
 
-        //todo, to return number of records deleted, to return 0 if no record deleted, to return -1 if failed
+        //todo, to return number of records updated, to return 0 if no record deleted, to return -1 if failed
         return 1;
     }
 
@@ -63,7 +63,7 @@ public class InfoHandler {
         lSQL = "DELETE FROM Info WHERE rowid = " + rowid + ";";
         mDB.execSQL("DELETE FROM Info WHERE rowid = " + rowid + ";");
 
-        //todo, to return 1 if successful, to return 0 if no record deleted, to return -1 if failed
+        //todo, to return number of record deleted, to return 0 if no record deleted, to return -1 if failed
         return 1;
     }
 
