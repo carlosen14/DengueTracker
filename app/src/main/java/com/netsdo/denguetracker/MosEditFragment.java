@@ -38,8 +38,6 @@ public class MosEditFragment extends Fragment {
 
     private Info mInfo;
 
-    private Long mrowid;
-
     private DayArrayAdapter mDayAdapter;
     private Calendar mCalendar;
     private ArrayWheelAdapter<String> miwhatAdapter;
@@ -50,13 +48,13 @@ public class MosEditFragment extends Fragment {
     private AbstractWheel mMinHolder;
     private AbstractWheel miwhatHolder;
 
-    View.OnClickListener mClickListener = new View.OnClickListener() {
+    private class ClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             String clickOn;
             switch (v.getId()) {
                 case R.id.iwhere:
-//                    Uri geoLocation = Uri.parse("geo:0,0?q=1.3569602420177331,103.88373221520939(Mosquito Bite on Right Leg)&z=20");
+                    Log.d(TAG, "ClickListener:"+ mInfo.getInfo());
                     Uri geoLocation = Uri.parse(mInfo.getiwhere(4));
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setData(geoLocation);
@@ -66,10 +64,10 @@ public class MosEditFragment extends Fragment {
                     clickOn = "iwhere";
                     break;
                 case R.id.delete:
-                    if (mrowid != null) {
-                        mInfoHandler.deleteInfo(mrowid);
+                    if (mInfo.getrowid() != Info.NULLLONG) {
+                        mInfoHandler.deleteInfo(mInfo.getrowid());
                     }
-                    EventBus.getInstance().post(new SwitchToPageEvent(1)); // hardcode to switch to MosList
+                    EventBus.getInstance().post(new SwitchToPageEvent(1)); // hardcode to switch back to MosList
                     clickOn = "delete";
                     break;
                 default:
@@ -77,11 +75,11 @@ public class MosEditFragment extends Fragment {
             }
             Log.d(TAG, "onClick, " + clickOn);
         }
-    };
+    }
 
-    OnWheelScrollListener mScrollListener = new OnWheelScrollListener() {
+    private class WheelScrollListener implements OnWheelScrollListener {
         public void onScrollingStarted(AbstractWheel wheel) {
-            // not handle the event
+            // not use the event
         }
 
         public void onScrollingFinished(AbstractWheel wheel) {
@@ -105,7 +103,7 @@ public class MosEditFragment extends Fragment {
             Toast.makeText(wheel.getContext(), "iwhen:" + mDayAdapter.getItemText(mDayHolder.getCurrentItem()) + String.format("%02d", mHourHolder.getCurrentItem()) + ":" + String.format("%02d", mMinHolder.getCurrentItem()) + ", iwhat:" + miwhatAdapter.getItemText(miwhatHolder.getCurrentItem()), Toast.LENGTH_SHORT).show();
             updateInfo();
         }
-    };
+    }
 
     private class DayArrayAdapter extends AbstractWheelTextAdapter {
         private final int daysCount = 30; // show date back to 3 weeks before
@@ -126,7 +124,7 @@ public class MosEditFragment extends Fragment {
 
         @Override
         public View getItem(int index, View cachedView, ViewGroup parent) {
-            int day = -daysCount + index + 10; // set default item to last 10th postion
+            int day = -daysCount + index + 10; // set default item to last 10th position
             Calendar newCalendar = (Calendar) calendar.clone();
             newCalendar.roll(Calendar.DAY_OF_YEAR, day);
 
@@ -192,13 +190,14 @@ public class MosEditFragment extends Fragment {
         Button liwhereButton = (Button) lFragment.findViewById(R.id.iwhere);
         Button lDeleteButton = (Button) lFragment.findViewById(R.id.delete);
 
-        liwhereButton.setOnClickListener(mClickListener);
-        lDeleteButton.setOnClickListener(mClickListener);
 
-        mDayHolder.addScrollingListener(mScrollListener);
-        mHourHolder.addScrollingListener(mScrollListener);
-        mMinHolder.addScrollingListener(mScrollListener);
-        miwhatHolder.addScrollingListener(mScrollListener);
+        liwhereButton.setOnClickListener(new ClickListener());
+        lDeleteButton.setOnClickListener(new ClickListener());
+
+        mDayHolder.addScrollingListener(new WheelScrollListener());
+        mHourHolder.addScrollingListener(new WheelScrollListener());
+        mMinHolder.addScrollingListener(new WheelScrollListener());
+        miwhatHolder.addScrollingListener(new WheelScrollListener());
 
         return lFragment;
     }
@@ -250,7 +249,7 @@ public class MosEditFragment extends Fragment {
     @Subscribe
     public void eventMosEdit(MosEditEvent event) {
         Log.d(TAG, "eventMosEdit, event:" + event.getrowid());
-        mrowid = event.getrowid();
+        mInfo.setrowid(event.getrowid());
     }
 
     private boolean loadInfo() {
@@ -258,11 +257,11 @@ public class MosEditFragment extends Fragment {
         // return false if data is not loaded
         String lInfo;
 
-        if (mrowid == null) {
+        if (mInfo.getrowid() == Info.NULLLONG) {
             return false; // no data
         }
 
-        lInfo = mInfoHandler.selectInfo(mrowid);
+        lInfo = mInfoHandler.selectInfo(mInfo.getrowid());
         if (lInfo == null) {
             return false; // no data
         }
@@ -286,7 +285,7 @@ public class MosEditFragment extends Fragment {
     private boolean showInfo() {
         // 0123456789  0  12345678901234567
         // yyyy-MM-dd\'T\'HH:mm:ss.SSSZ
-        mrowidHolder.setText(mInfo.getrowid().toString());
+        mrowidHolder.setText(String.format("%d", mInfo.getrowid()));
         miwhatHolder.setCurrentItem(2); // todo, to map string into number
         mDayAdapter.notifyDataChangedEvent();
         mDayHolder.setCurrentItem(20); // hardcode, todo
@@ -296,7 +295,7 @@ public class MosEditFragment extends Fragment {
         return true;
     }
 
-    private int updateInfo() {
+    private long updateInfo() {
         return mInfoHandler.updateInfo(mInfo.getrowid(), mInfo.getiwho(), mInfo.getiwhen(), mInfo.getiwhere(), mInfo.getihow(), mInfo.getiwhat(), mInfo.getiwhy());
     }
 }

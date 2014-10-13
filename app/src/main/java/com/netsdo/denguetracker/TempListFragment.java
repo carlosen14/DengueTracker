@@ -29,7 +29,7 @@ public class TempListFragment extends Fragment {
     private TextView rawTextView;
     private ArrayList<Book> bookArray;
 
-    private OnItemClickListener mClickListener = new OnItemClickListener() {
+    private class ItemClickListener implements OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             // arg2 = the id of the item in our view (List/Grid) that we clicked
@@ -38,39 +38,6 @@ public class TempListFragment extends Fragment {
             // That means if we comment, aBookDetail.setBookIsbn(i); arg3 value become 0
             Toast.makeText(getActivity(), "You clicked on position : " + position + " and id : " + id, Toast.LENGTH_LONG).show();
         }
-    };
-
-    /**
-     * Called when the activity is first created.
-     */
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-		View fragmentView = inflater.inflate(R.layout.custom_listview, container, false);
-
-        // To show the books in a list
-        bookListView = (ListView) fragmentView.findViewById(R.id.booksListView);
-
-        // We pass this bookArray to our CustomAdapter
-        bookArray = new ArrayList<Book>();
-
-        // Setting values to books
-        for (int i = 20; i < 50; i++) {
-            Book aBookDetail = new Book();
-            aBookDetail.setBookIsbn(i);
-            aBookDetail.setBookName("Book name : " + i);
-            aBookDetail.setBookAutorName("Book author : " + i);
-
-            bookArray.add(aBookDetail);
-        }
-
-        // Initialize our Adapter and plug it to the ListView
-        CustomAdapter customAdapter = new CustomAdapter(bookArray);
-        bookListView.setAdapter(customAdapter);
-
-        // Activate the Click even of the List items
-        bookListView.setOnItemClickListener(mClickListener);
-        return fragmentView;
     }
 
     // Regular inner class which act as the Adapter
@@ -125,6 +92,39 @@ public class TempListFragment extends Fragment {
 
             return convertView;
         }
+    }
+
+    /**
+     * Called when the activity is first created.
+     */
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+		View fragmentView = inflater.inflate(R.layout.custom_listview, container, false);
+
+        // To show the books in a list
+        bookListView = (ListView) fragmentView.findViewById(R.id.booksListView);
+
+        // We pass this bookArray to our CustomAdapter
+        bookArray = new ArrayList<Book>();
+
+        // Setting values to books
+        for (int i = 20; i < 50; i++) {
+            Book aBookDetail = new Book();
+            aBookDetail.setBookIsbn(i);
+            aBookDetail.setBookName("Book name : " + i);
+            aBookDetail.setBookAutorName("Book author : " + i);
+
+            bookArray.add(aBookDetail);
+        }
+
+        // Initialize our Adapter and plug it to the ListView
+        CustomAdapter customAdapter = new CustomAdapter(bookArray);
+        bookListView.setAdapter(customAdapter);
+
+        // Activate the Click even of the List items
+        bookListView.setOnItemClickListener(new ItemClickListener());
+        return fragmentView;
     }
 
     @Override

@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 
 import com.netsdo.swipe4d.EventBus;
 import com.netsdo.swipe4d.FragmentsClassesPagerAdapter;
-import com.netsdo.swipe4d.MosEditEvent;
 import com.netsdo.swipe4d.PageChangedEvent;
 import com.netsdo.swipe4d.SwitchToPageEvent;
 import com.squareup.otto.Subscribe;
@@ -23,7 +22,7 @@ public class MosCompositeFragment extends Fragment {
 
     private ViewPager mHorizontalPager;
     private int mCentralPageIndex = 0;
-    private OnPageChangeListener mPagerChangeListener = new OnPageChangeListener() {
+    private class PageChangeListener implements OnPageChangeListener {
         @Override
         public void onPageSelected(int position) {
             Log.d(TAG, "onPageSelected, position:" + position + ", mCentralPageIndex:" + mCentralPageIndex);
@@ -52,7 +51,7 @@ public class MosCompositeFragment extends Fragment {
     private void initViews() {
         populateHorizontalPager();
         mHorizontalPager.setCurrentItem(mCentralPageIndex); //todo, modify here to display last user visit page.
-        mHorizontalPager.setOnPageChangeListener(mPagerChangeListener);
+        mHorizontalPager.setOnPageChangeListener(new PageChangeListener());
     }
 
     private void populateHorizontalPager() {
@@ -83,6 +82,6 @@ public class MosCompositeFragment extends Fragment {
 
     @Subscribe
     public void eventSwitchToPage(SwitchToPageEvent event) {
-        mHorizontalPager.setCurrentItem(event.getPosition());
+        mHorizontalPager.setCurrentItem(event.getPage());
     }
 }

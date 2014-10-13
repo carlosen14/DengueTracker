@@ -29,7 +29,7 @@ public class MosBiteFragment extends Fragment {
     private MainActivity mParentActivity;
     private InfoHandler mInfoHandler;
 
-    View.OnClickListener mClickListener = new View.OnClickListener() {
+    private class ClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             String lBiteOn;
@@ -58,8 +58,8 @@ public class MosBiteFragment extends Fragment {
                     break;
                 case R.id.lhbutton:
                     lBiteOn = "LeftHand";
-                    Integer norec = mInfoHandler.openSelectInfo(null, null, null, null, null, null, null); // for testing purpose, to be removed before final release.
-                    if (norec != 0) {
+                    long lNoRec = mInfoHandler.openSelectInfo(InfoHandler.NULLLONG, null, null, null, null, null, null); // for testing purpose, to be removed before final release.
+                    if (lNoRec != 0) {
                         String lInfo = mInfoHandler.selectNextInfo();
                         while (lInfo != null) {
                             Log.d(TAG, lInfo);
@@ -89,7 +89,7 @@ public class MosBiteFragment extends Fragment {
                     null); // iwhy
 
         }
-    };
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
@@ -107,16 +107,16 @@ public class MosBiteFragment extends Fragment {
         ImageView lhbutton = (ImageView) fragmentView.findViewById(R.id.lhbutton);
         ImageView llbutton = (ImageView) fragmentView.findViewById(R.id.llbutton);
         ImageView lfbutton = (ImageView) fragmentView.findViewById(R.id.lfbutton);
-        hbutton.setOnClickListener(mClickListener);
-        bbutton.setOnClickListener(mClickListener);
-        rabutton.setOnClickListener(mClickListener);
-        rhbutton.setOnClickListener(mClickListener);
-        rlbutton.setOnClickListener(mClickListener);
-        rfbutton.setOnClickListener(mClickListener);
-        labutton.setOnClickListener(mClickListener);
-        lhbutton.setOnClickListener(mClickListener);
-        llbutton.setOnClickListener(mClickListener);
-        lfbutton.setOnClickListener(mClickListener);
+        hbutton.setOnClickListener(new ClickListener());
+        bbutton.setOnClickListener(new ClickListener());
+        rabutton.setOnClickListener(new ClickListener());
+        rhbutton.setOnClickListener(new ClickListener());
+        rlbutton.setOnClickListener(new ClickListener());
+        rfbutton.setOnClickListener(new ClickListener());
+        labutton.setOnClickListener(new ClickListener());
+        lhbutton.setOnClickListener(new ClickListener());
+        llbutton.setOnClickListener(new ClickListener());
+        lfbutton.setOnClickListener(new ClickListener());
 
         return fragmentView;
     }

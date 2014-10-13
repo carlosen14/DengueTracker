@@ -12,7 +12,9 @@ import java.util.Date;
 public class Info {
     private static String TAG = "Info";
 
-    private Long rowid;
+    public final static long NULLLONG = -1;
+
+    private long rowid = NULLLONG; // -1 reserved for no data stored.
     private String iwho;
     private String iwhen;
     private String iwhere;
@@ -20,7 +22,7 @@ public class Info {
     private String iwhat;
     private String iwhy;
 
-    public void setrowid(Long rowid) {
+    public void setrowid(long rowid) {
         this.rowid = rowid;
     }
 
@@ -48,7 +50,7 @@ public class Info {
         this.iwhy = iwhy;
     }
 
-    public Long getrowid() {
+    public long getrowid() {
         return rowid;
     }
 
@@ -68,12 +70,14 @@ public class Info {
         try {
             JSONObject lObj = new JSONObject(iwhere);
             switch (format) {
+                case 0: // return uri geo format, "geo:0,0?q=1.3569602420177331,103.88373221520939(Mosquito Bite on Right Leg)&z=20"
+                    return "geo:0,0?q=" + lObj.getString("latitude") + "," + lObj.getString("longitude") + " (" + getihow(1) + " " + getiwhat(1) + ")&z=20"; //hardcode zoom level to 20
                 case 1:
                     return "Latitude: " + lObj.getString("latitude") + ", Longitude: " + lObj.getString("longitude");
                 case 2:
                     return "Latitude: " + lObj.getString("latitude") + ", Longitude: " + lObj.getString("longitude") + ", Altitude: " + lObj.getString("altitude");
-                default: // return uri geo format, "geo:0,0?q=1.3569602420177331,103.88373221520939(Mosquito Bite on Right Leg)&z=20"
-                    return "geo:0,0?q=" + lObj.getString("latitude") + "," + lObj.getString("longitude") + " (" + getihow(1) + " " + getiwhat(1) + ")&z=20";
+                default:
+                    return iwhere;
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -139,7 +143,6 @@ public class Info {
         try {
             JSONObject lObj = new JSONObject(jInfo);
             JSONArray lInfoObj = lObj.getJSONArray("info");
-
             JSONObject lInfoRec = lInfoObj.getJSONObject(0); // to get first record only.
 
             rowid = lInfoRec.getLong("rowid");
@@ -154,12 +157,23 @@ public class Info {
         } catch (JSONException e) {
             e.printStackTrace();
 
+            rowid = -1;
+            iwho = null;
+            iwhen = null;
+            iwhere = null;
+            ihow = null;
+            iwhat = null;
+            iwhy = null;
+
             return false;
         }
-
     }
 
     public String getInfo() {
+        if (rowid == NULLLONG) {
+            return null;
+        }
+
         try {
             JSONObject lObj = new JSONObject();
             JSONArray lInfo = new JSONArray();
@@ -170,7 +184,7 @@ public class Info {
             lInfoRec.put("rowid", rowid);
             lInfoRec.put("iwho", iwho);
             lInfoRec.put("iwhen", iwhen);
-            lInfoRec.put("iwhere", (new JSONObject(iwhere)).toString());
+            lInfoRec.put("iwhere", (new JSONObject(iwhere)));
             lInfoRec.put("ihow", ihow);
             lInfoRec.put("iwhat", iwhat);
             lInfoRec.put("iwhy", iwhy);

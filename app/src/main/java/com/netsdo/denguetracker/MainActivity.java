@@ -20,7 +20,7 @@ public class MainActivity extends FragmentActivity {
 
     private VerticalPager mVerticalPager;
 
-    OnGlobalLayoutListener mLayoutListener = new OnGlobalLayoutListener() {
+    private class GlobalLayoutListener implements OnGlobalLayoutListener {
         @SuppressWarnings("deprecation")
         @Override
         public void onGlobalLayout() {
@@ -37,7 +37,7 @@ public class MainActivity extends FragmentActivity {
         private void removeGlobalOnLayoutListenerForJellyBean() {
             mVerticalPager.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
-    };
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +55,7 @@ public class MainActivity extends FragmentActivity {
          * VerticalPager is not fully initialized at the moment, so we want to snap to the central page only when it
 		 * layout and measure all its pages.
 		 */
-        mVerticalPager.getViewTreeObserver().addOnGlobalLayoutListener(mLayoutListener);
+        mVerticalPager.getViewTreeObserver().addOnGlobalLayoutListener(new GlobalLayoutListener());
     }
 
     @Override

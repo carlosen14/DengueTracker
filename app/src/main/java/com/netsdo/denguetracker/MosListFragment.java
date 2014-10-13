@@ -33,7 +33,7 @@ public class MosListFragment extends Fragment {
     private MosListAdapter mAdapter;
     private ArrayList<Info> mInfoArray;
 
-    AdapterView.OnItemClickListener mListListener = new AdapterView.OnItemClickListener() {
+    private class ItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             //todo, highlight the item after it is clicked.
@@ -41,7 +41,7 @@ public class MosListFragment extends Fragment {
             EventBus.getInstance().post(new MosEditEvent(id));
             EventBus.getInstance().post(new SwitchToPageEvent(2)); // hardcode to switch to MosEdit
         }
-    };
+    }
 
     public class MosListAdapter extends BaseAdapter {
 
@@ -110,7 +110,7 @@ public class MosListFragment extends Fragment {
             }
 
             if (mmInfoArray != null) {
-                lViewHolder.rowid.setText(mmInfoArray.get(position).getrowid().toString());
+                lViewHolder.rowid.setText(String.format("%d", mmInfoArray.get(position).getrowid()));
                 lViewHolder.iwho.setText(""); // not display iwho
                 lViewHolder.iwhen.setText(mmInfoArray.get(position).getiwhen());
                 lViewHolder.iwhere.setText(mmInfoArray.get(position).getiwhere(1)); // display simple format
@@ -137,7 +137,7 @@ public class MosListFragment extends Fragment {
         mAdapter = new MosListAdapter(mInfoArray);
         lList.setAdapter(mAdapter);
 
-        lList.setOnItemClickListener(mListListener);
+        lList.setOnItemClickListener(new ItemClickListener());
 
         return lView;
     }
@@ -215,7 +215,7 @@ public class MosListFragment extends Fragment {
 
         try {
             JSONObject lObj = new JSONObject(lInfo);
-            Integer lNoRec = lObj.getInt("norec");
+            long lNoRec = lObj.getLong("norec");
             JSONArray lInfoObj = lObj.getJSONArray("info");
             for (int i = 0; i < lNoRec; i++) {
                 JSONObject lInfoRec = lInfoObj.getJSONObject(i);

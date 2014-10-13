@@ -19,7 +19,7 @@ public class TempCompositeFragment extends Fragment {
 
 	private ViewPager mHorizontalPager;
 	private int mCentralPageIndex = 0;
-	private OnPageChangeListener mPagerChangeListener = new OnPageChangeListener() {
+	private class PageChangeListener implements OnPageChangeListener {
 		@Override
 		public void onPageSelected(int position) {
 			EventBus.getInstance().post(new PageChangedEvent(mCentralPageIndex == position));
@@ -32,7 +32,7 @@ public class TempCompositeFragment extends Fragment {
 		@Override
 		public void onPageScrollStateChanged(int state) {
 		}
-	};
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,7 +47,7 @@ public class TempCompositeFragment extends Fragment {
 	private void initViews() {
 		populateHorizontalPager();
 		mHorizontalPager.setCurrentItem(mCentralPageIndex);
-		mHorizontalPager.setOnPageChangeListener(mPagerChangeListener);
+		mHorizontalPager.setOnPageChangeListener(new PageChangeListener());
 	}
 
 	private void populateHorizontalPager() {
