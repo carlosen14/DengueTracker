@@ -20,9 +20,14 @@ import com.netsdo.swipe4d.EventBus;
 import com.netsdo.swipe4d.VerticalPagerSwitchedEvent;
 import com.squareup.otto.Subscribe;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MosBiteFragment extends Fragment {
     private static String TAG = "MosBiteFragment";
     private static int VPOS = 0; //VerticalPage Position, for Fragment defined as Central Page only, should be same as the position in activity_main.xml
+
+    private static String mihow = "MosBite";
 
     private BestLocationProvider mBestLocationProvider;
     private BestLocationListener mBestLocationListener;
@@ -58,7 +63,18 @@ public class MosBiteFragment extends Fragment {
                     break;
                 case R.id.lhbutton:
                     lBiteOn = "LeftHand";
-                    long lNoRec = mInfoHandler.openSelectInfo(InfoHandler.NULLLONG, null, null, null, null, null, null); // for testing purpose, to be removed before final release.
+                    String lSQL;// for testing purpose, to be removed before final release.
+                    long lNoRec;
+                    try {
+                        lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info ORDER BY iwhen DESC;";
+                        JSONObject lObj = new JSONObject();
+                        lObj.put("sql", lSQL);
+                        lNoRec = mInfoHandler.openSelectInfo(lObj.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.d(TAG, "openSelectInfo wrong.");
+                        lNoRec = 0;
+                    }
                     if (lNoRec != 0) {
                         String lInfo = mInfoHandler.selectNextInfo();
                         while (lInfo != null) {
@@ -66,7 +82,7 @@ public class MosBiteFragment extends Fragment {
                             lInfo = mInfoHandler.selectNextInfo();
                         }
                     } else {
-                        Log.i(TAG, "no record of Info found.");
+                        Log.d(TAG, "no record of Info found.");
                     }
                     break;
                 case R.id.llbutton:
@@ -80,14 +96,22 @@ public class MosBiteFragment extends Fragment {
             }
             Toast.makeText(v.getContext(), "Mosquito Bite On " + lBiteOn, Toast.LENGTH_SHORT).show();
             Log.i(TAG, lBiteOn + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
-            long mosBite = mInfoHandler.insertInfo(
-                    null, //iwho
-                    new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()), // iwhen
-                    mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()), //iwhere
-                    "MosBite", //ihow
-                    lBiteOn, //iwhat
-                    null); // iwhy
 
+            Info lInfo = new Info();
+            lInfo.setrowid(Info.ZEROLONG);
+            lInfo.setiwhen(new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()));
+            lInfo.setiwhere(mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
+            lInfo.setihow(mihow);
+            lInfo.setiwhat(lBiteOn);
+            String lsInfo = lInfo.getInfo();
+            if (lsInfo == Info.NULLSTRING) {
+                return;
+            } else {
+                if (mInfoHandler.insertInfo(lsInfo) == 0) {
+                    Log.d(TAG, "ClickListener, no record lsInfo:" + lsInfo); //todo, show error to user.
+                }
+                ;
+            }
         }
     }
 
@@ -191,27 +215,27 @@ public class MosBiteFragment extends Fragment {
 
                 @Override
                 public void onStatusChanged(String provider, int status, Bundle extras) {
-                    Log.i(TAG, "onStatusChanged, PROVIDER:" + provider + ", STATUS:" + String.valueOf(status));
+                    Log.d(TAG, "onStatusChanged, PROVIDER:" + provider + ", STATUS:" + String.valueOf(status));
                 }
 
                 @Override
                 public void onProviderEnabled(String provider) {
-                    Log.i(TAG, "onProviderEnabled, PROVIDER:" + provider);
+                    Log.d(TAG, "onProviderEnabled, PROVIDER:" + provider);
                 }
 
                 @Override
                 public void onProviderDisabled(String provider) {
-                    Log.i(TAG, "onProviderDisabled, PROVIDER:" + provider);
+                    Log.d(TAG, "onProviderDisabled, PROVIDER:" + provider);
                 }
 
                 @Override
                 public void onLocationUpdateTimeoutExceeded(LocationType type) {
-//todo                    Log.w(TAG, "onLocationUpdateTimeoutExceeded, TYPE:" + type);
+                    Log.d(TAG, "onLocationUpdateTimeoutExceeded, TYPE:" + type);
                 }
 
                 @Override
                 public void onLocationUpdate(Location location, BestLocationProvider.LocationType type, boolean isFresh) {
-                    Log.i(TAG, "onLocationUpdate, TYPE:" + type + ", LOCATION:" + mBestLocationProvider.locationToString(location));
+                    Log.d(TAG, "onLocationUpdate, TYPE:" + type + ", LOCATION:" + mBestLocationProvider.locationToString(location));
                 }
             };
 

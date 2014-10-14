@@ -225,17 +225,19 @@ public class BestLocationProvider {
         try {
             JSONObject lObj = new JSONObject();
             if (l == null) {
+                lObj.put("fetchdatetime", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date()));
                 lObj.put("longitude", 0);
                 lObj.put("latitude", 0);
                 lObj.put("altitude", 0);
                 lObj.put("speed", 0);
                 lObj.put("bearing", 0);
                 lObj.put("accuracy", 0);
-                lObj.put("time", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date()));
+                lObj.put("time", "2000-01-01T00:00:00.000T+0000");
                 lObj.put("provider", "null");
                 lObj.put("elapsedrealtimenanos", 0);
                 lObj.put("extras", "null");
             } else {
+                lObj.put("fetchdatetime", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date()));  // time to fetch location data.
                 lObj.put("longitude", l.getLongitude());
                 lObj.put("latitude", l.getLatitude());
                 lObj.put("altitude", l.getAltitude());
@@ -246,6 +248,8 @@ public class BestLocationProvider {
                 lObj.put("provider", l.getProvider());
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     lObj.put("elapsedrealtimenanos", l.getElapsedRealtimeNanos());
+                } else {
+                    lObj.put("elapsedrealtimenanos", 0); // default value if not available.
                 }
                 lObj.put("extras", l.getExtras());
             }

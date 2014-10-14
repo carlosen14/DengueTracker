@@ -19,7 +19,9 @@ public class InfoHandler {
 
     private Context mContext;
     private SQLiteDatabase mDB;
-    private Cursor mCursor; // cursor used by batch selection in method selectInfo
+
+    // variable used by batch selection in method openSelectInfo, selectNextInfo, closeSelectInfo
+    private Cursor mCursor;
     private String mSQL;
     private String mDateTime;
     private long mNoRec;
@@ -32,84 +34,88 @@ public class InfoHandler {
         createInfoDB();
     }
 
-    public long insertInfo(String iwho, String iwhen, String iwhere, String ihow, String iwhat, String iwhy) {
+    public long insertInfo(String jInfo) {
+        // return x if number of records inserted,
+        // return 0 if no record inserted
+        // return NULLLONG if failed
+        Log.d(TAG, "insertInto, JSON:" + jInfo);
         String lSQL;
 
-        lSQL = "INSERT INTO Info(iwho, iwhen, iwhere, ihow, iwhat, iwhy) VALUES('" + iwho + "','" + iwhen + "','" + iwhere + "','" + ihow + "','" + iwhat + "','" + iwhy + "');";
-        Log.d(TAG, lSQL);
-        mDB.execSQL(lSQL);
+        try {
+            JSONObject lInfoRec = (new JSONObject(jInfo)).getJSONArray("info").getJSONObject(0); // to handle first record at the moment.
+            lSQL = "INSERT INTO Info(iwho, iwhen, iwhere, ihow, iwhat, iwhy) VALUES('" + lInfoRec.getString("iwho") + "', '" + lInfoRec.getString("iwhen") + "', '" + lInfoRec.getString("iwhere") + "', '" + lInfoRec.getString("ihow") + "', '" + lInfoRec.getString("iwhat") + "', '" + lInfoRec.getString("iwhy") + "');";
+            Log.d(TAG, lSQL);
+            mDB.execSQL(lSQL);
 
-        //todo, to return rowid if inserted, to return -1 if failed
-        return 1;
+            return 1; //todo, hardcode
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return NULLLONG;
+        }
     }
 
-    public long updateInfo(long rowid, String iwho, String iwhen, String iwhere, String ihow, String iwhat, String iwhy) {
+    public long updateInfo(String jInfo) {
+        // return x if number of records inserted,
+        // return 0 if no record inserted
+        // return NULLLONG if failed
+        Log.d(TAG, "updateInfo, JSON:" + jInfo);
         String lSQL;
 
-        lSQL = "UPDATE Info SET iwho = '" + iwho + "', iwhen = '" + iwhen + "', iwhere = '" + iwhere + "', ihow = '" + ihow + "', iwhat = '" + iwhat + "', iwhy = '" + iwhy + "' WHERE rowid = " + rowid + ";";
-        Log.d(TAG, lSQL);
-        mDB.execSQL(lSQL);
+        try {
+            JSONObject lInfoRec = (new JSONObject(jInfo)).getJSONArray("info").getJSONObject(0); // to handle first record at the moment.
+            lSQL = "UPDATE Info SET iwho = '" + lInfoRec.getString("iwho") + "', iwhen = '" + lInfoRec.getString("iwhen") + "', iwhere = '" + lInfoRec.getString("iwhere") + "', ihow = '" + lInfoRec.getString("ihow") + "', iwhat = '" + lInfoRec.getString("iwhat") + "', iwhy = '" + lInfoRec.getString("iwhy") + "' WHERE rowid = " + lInfoRec.getLong("rowid") + ";";
+            Log.d(TAG, lSQL);
+            mDB.execSQL(lSQL);
 
-        //todo, to return number of records updated, to return 0 if no record deleted, to return -1 if failed
-        return 1;
+            return 1; //todo, hardcode
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return NULLLONG;
+        }
     }
 
     public long deleteInfo(long rowid) {
+        // return x if number of records inserted,
+        // return 0 if no record inserted
+        // return NULLLONG if failed
         String lSQL;
 
         lSQL = "DELETE FROM Info WHERE rowid = " + rowid + ";";
         Log.d(TAG, lSQL);
         mDB.execSQL(lSQL);
 
-        //todo, to return number of record deleted, to return 0 if no record deleted, to return -1 if failed
-        return 1;
+        return 1; //todo, hardcode
     }
 
-    public long openSelectInfo(long rowid, String iwho, String iwhen, String iwhere, String ihow, String iwhat, String iwhy) {
+    public long openSelectInfo(String jSQL) {
+        // assume the query includes all columns in original sequence. SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info;
+        Log.d(TAG, "openSelectInfo, JSON:" + jSQL);
+
         if (mCursor != null && !mCursor.isClosed()) {
             mCursor.close();
         }
 
-        mSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE 1 = 1 ";
-        if (rowid != NULLLONG) {
-            mSQL += "AND rowid = " + rowid;
-        } else {
-            if (iwho != null) {
-                mSQL += "AND iwho  = '" + iwho + "'";
-            }
-            if (iwhen != null) {
-                mSQL += "AND iwhen  = '" + iwhen + "'";
-            }
-            if (iwhere != null) {
-                mSQL += "AND iwhere = '" + iwhere + "'";
-            }
-            if (ihow != null) {
-                mSQL += "AND ihow   = '" + ihow + "'";
-            }
-            if (iwhat != null) {
-                mSQL += "AND iwhat  = '" + iwhat + "'";
-            }
-            if (iwhy != null) {
-                mSQL += "AND iwhy  = '" + iwhy + "'";
-            }
+        try {
+            mSQL = (new JSONObject(jSQL)).getString("sql");
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return NULLLONG;
         }
-        mSQL += ";";
-        Log.d(TAG, mSQL);
 
         mDateTime = new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date());
+        Log.d(TAG, mSQL);
         mCursor = mDB.rawQuery(mSQL, null);
         mNoRec = mCursor.getCount();
-
         if (mNoRec == 0) {
-            if (mCursor != null && !mCursor.isClosed()) {
+            if (!mCursor.isClosed()) {
                 mCursor.close();
             }
-
-            return 0;
-        } else {
-
-            return mNoRec;
         }
+
+        return mNoRec;
     }
 
     public String selectNextInfo() {
@@ -125,12 +131,12 @@ public class InfoHandler {
 
                 lObj.put("sql", mSQL);
                 lObj.put("norec", mNoRec);
-                lObj.put("datetime", mDateTime);
+                lObj.put("datetime", mDateTime); // SQL initialization date time
                 lInfoRec.put("position", mCursor.getPosition());
                 lInfoRec.put("rowid", mCursor.getLong(0));
                 lInfoRec.put("iwho", mCursor.getString(1));
                 lInfoRec.put("iwhen", mCursor.getString(2));
-                lInfoRec.put("iwhere", (new JSONObject(mCursor.getString(3)))); // iwhere is in JSON format
+                lInfoRec.put("iwhere", (new JSONObject(mCursor.getString(3)))); // iwhere is JSON format
                 lInfoRec.put("ihow", mCursor.getString(4));
                 lInfoRec.put("iwhat", mCursor.getString(5));
                 lInfoRec.put("iwhy", mCursor.getString(6));
@@ -197,24 +203,21 @@ public class InfoHandler {
 
     public String selectInfo(String jSQL) {
         // assume the query includes all columns in original sequence. SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info;
+        Log.d(TAG, "selectInfo, JSON:" + jSQL);
+
         Cursor lCursor;
         String lSQL;
         long lNoRec;
-        String lDateTime;
-
-        lDateTime = new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date());
-
-        Log.d(TAG, "selectInfo, DATE:" + lDateTime + ", JSON:" + jSQL);
 
         try {
-            JSONObject mObj;
-            mObj = new JSONObject(jSQL);
-            lSQL = mObj.getString("sql");
+            lSQL = (new JSONObject(jSQL)).getString("sql");
         } catch (JSONException e) {
             e.printStackTrace();
+
             return null;
         }
 
+        Log.d(TAG, lSQL);
         lCursor = mDB.rawQuery(lSQL, null);
         lNoRec = lCursor.getCount();
         if (lNoRec == 0) {
@@ -223,30 +226,30 @@ public class InfoHandler {
             return null;
         } else {
             try {
-                JSONObject mObj = new JSONObject();
-                JSONArray mInfoObj = new JSONArray();
+                JSONObject lObj = new JSONObject();
+                JSONArray lInfoObj = new JSONArray();
 
-                mObj.put("sql", lSQL);
-                mObj.put("norec", lNoRec);
-                mObj.put("datetime", lDateTime);
-                Log.d(TAG, "selectAllInfo(String), Partial JSON:" + mObj.toString());
+                lObj.put("sql", lSQL);
+                lObj.put("norec", lNoRec);
+                lObj.put("datetime", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date()));
+                Log.d(TAG, "selectAllInfo(String), Partial JSON:" + lObj.toString());
                 while (lCursor.moveToNext()) {
-                    JSONObject mInfoRec = new JSONObject();
-                    mInfoRec.put("position", lCursor.getPosition());
-                    mInfoRec.put("rowid", lCursor.getLong(0));
-                    mInfoRec.put("iwho", lCursor.getString(1));
-                    mInfoRec.put("iwhen", lCursor.getString(2));
-                    mInfoRec.put("iwhere", new JSONObject(lCursor.getString(3))); // iwhere is in JSON format
-                    mInfoRec.put("ihow", lCursor.getString(4));
-                    mInfoRec.put("iwhat", lCursor.getString(5));
-                    mInfoRec.put("iwhy", lCursor.getString(6));
-                    mInfoObj.put(mInfoRec);
+                    JSONObject lInfoRec = new JSONObject();
+                    lInfoRec.put("position", lCursor.getPosition());
+                    lInfoRec.put("rowid", lCursor.getLong(0));
+                    lInfoRec.put("iwho", lCursor.getString(1));
+                    lInfoRec.put("iwhen", lCursor.getString(2));
+                    lInfoRec.put("iwhere", new JSONObject(lCursor.getString(3))); // iwhere is in JSON format
+                    lInfoRec.put("ihow", lCursor.getString(4));
+                    lInfoRec.put("iwhat", lCursor.getString(5));
+                    lInfoRec.put("iwhy", lCursor.getString(6));
+                    lInfoObj.put(lInfoRec);
                 }
                 lCursor.close();
-                mObj.put("info", mInfoObj);
-                Log.d(TAG, "selectAllInfo(String), Full JSON:" + mObj.toString());
+                lObj.put("info", lInfoObj);
+                Log.d(TAG, "selectAllInfo(String), Full JSON:" + lObj.toString());
 
-                return mObj.toString();
+                return lObj.toString();
             } catch (JSONException e) {
                 e.printStackTrace();
                 lCursor.close();
@@ -257,14 +260,16 @@ public class InfoHandler {
     }
 
     public long truncateInfo() {
+        // return x if number of records inserted,
+        // return 0 if no record inserted
+        // return NULLLONG if failed
         String lSQL;
 
         lSQL = "DELETE FROM Info; VACUUM;";
         Log.d(TAG, lSQL);
         mDB.execSQL(lSQL);
 
-        //todo, to return number of records truncated, to return -1 if failed
-        return 1;
+        return 1; //todo, hardcode
     }
 
     public void createInfoDB() {
@@ -277,8 +282,6 @@ public class InfoHandler {
 
     public void upgradeInfoDB() {
         String lSQL;
-
-        mDB = mContext.openOrCreateDatabase("InfoDB", Context.MODE_PRIVATE, null);
 
         lSQL = "DROP TABLE Info;";
         Log.d(TAG, lSQL);

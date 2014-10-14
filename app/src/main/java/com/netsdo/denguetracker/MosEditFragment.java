@@ -55,7 +55,7 @@ public class MosEditFragment extends Fragment {
             switch (v.getId()) {
                 case R.id.iwhere:
                     Log.d(TAG, "ClickListener:"+ mInfo.getInfo());
-                    Uri geoLocation = Uri.parse(mInfo.getiwhere(4));
+                    Uri geoLocation = Uri.parse(mInfo.getiwhere("0"));
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setData(geoLocation);
                     if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
@@ -163,7 +163,7 @@ public class MosEditFragment extends Fragment {
         mInfoHandler = mParentActivity.mInfoHandler;
         mInfo = new Info();
 
-        //todo, to solve problem, during initial loading, the edit page is not triggered to load first record in list page.
+        //todo, to solve a problem, during initial loading, the edit page is not triggered to load first record in list page.
         loadInfo();
 
         mrowidHolder = (TextView) lFragment.findViewById(R.id.rowid);
@@ -268,10 +268,9 @@ public class MosEditFragment extends Fragment {
 
         mInfo.setInfo(lInfo);
 
-        SimpleDateFormat lFormat = new SimpleDateFormat(mParentActivity.getString(R.string.iso6301));
         Date lDate;
         try {
-            lDate = lFormat.parse(mInfo.getiwhen());
+            lDate = (new SimpleDateFormat(mParentActivity.getString(R.string.iso6301))).parse(mInfo.getiwhen());
         } catch (ParseException e) {
             e.printStackTrace();
             return false; // iwhen is wrong, no data to show
@@ -283,12 +282,12 @@ public class MosEditFragment extends Fragment {
     }
 
     private boolean showInfo() {
-        // 0123456789  0  12345678901234567
-        // yyyy-MM-dd\'T\'HH:mm:ss.SSSZ
         mrowidHolder.setText(String.format("%d", mInfo.getrowid()));
         miwhatHolder.setCurrentItem(2); // todo, to map string into number
         mDayAdapter.notifyDataChangedEvent();
         mDayHolder.setCurrentItem(20); // hardcode, todo
+        // 0123456789  0  12345678901234567
+        // yyyy-MM-dd\'T\'HH:mm:ss.SSSZ
         mHourHolder.setCurrentItem(Integer.parseInt(mInfo.getiwhen().substring(11, 13)));
         mMinHolder.setCurrentItem(Integer.parseInt(mInfo.getiwhen().substring(14, 16)));
 
@@ -296,6 +295,6 @@ public class MosEditFragment extends Fragment {
     }
 
     private long updateInfo() {
-        return mInfoHandler.updateInfo(mInfo.getrowid(), mInfo.getiwho(), mInfo.getiwhen(), mInfo.getiwhere(), mInfo.getihow(), mInfo.getiwhat(), mInfo.getiwhy());
+        return mInfoHandler.updateInfo(mInfo.getInfo());
     }
 }

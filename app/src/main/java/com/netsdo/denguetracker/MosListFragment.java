@@ -113,7 +113,7 @@ public class MosListFragment extends Fragment {
                 lViewHolder.rowid.setText(String.format("%d", mmInfoArray.get(position).getrowid()));
                 lViewHolder.iwho.setText(""); // not display iwho
                 lViewHolder.iwhen.setText(mmInfoArray.get(position).getiwhen());
-                lViewHolder.iwhere.setText(mmInfoArray.get(position).getiwhere(1)); // display simple format
+                lViewHolder.iwhere.setText(mmInfoArray.get(position).getiwhere("1")); // display simple format
                 lViewHolder.ihow.setText("Mosquito Bite On"); // fixed value
                 lViewHolder.iwhat.setText(mmInfoArray.get(position).getiwhat());
                 lViewHolder.iwhy.setText(""); // not display iwhy
@@ -198,9 +198,8 @@ public class MosListFragment extends Fragment {
 
         mInfoArray.clear();
 
-        lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE ihow = 'MosBite' ORDER BY iwhen DESC;";
-
         try {
+            lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE ihow = 'MosBite' ORDER BY iwhen DESC;";
             JSONObject lObj = new JSONObject();
             lObj.put("sql", lSQL);
             lInfo = mInfoHandler.selectInfo(lObj.toString());

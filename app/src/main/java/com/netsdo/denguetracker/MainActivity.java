@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import com.netsdo.swipe4d.EventBus;
@@ -11,12 +12,18 @@ import com.netsdo.swipe4d.PageChangedEvent;
 import com.netsdo.swipe4d.VerticalPager;
 import com.squareup.otto.Subscribe;
 
+import org.json.JSONException;
+
+import java.util.Locale;
+
 public class MainActivity extends FragmentActivity {
     private static String TAG = "MainActivity";
 
     private static final int START_PAGE_INDEX = 0;
 
-    public InfoHandler mInfoHandler;
+    public static InfoHandler mInfoHandler;
+
+    public static StringDisplay mStringDisplay;
 
     private VerticalPager mVerticalPager;
 
@@ -45,8 +52,11 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
         mVerticalPager = (VerticalPager) findViewById(R.id.activity_main_vertical_pager);
 
+        //todo, keep locale preference and load it during startup.
         mInfoHandler = new InfoHandler(this);
-
+        mStringDisplay = new StringDisplay();
+//        mStringDisplay.setLocale(Locale.FRENCH);
+//        Log.d(TAG, mStringDisplay.getDisplay("MosBite"));
         initViews();
     }
 
