@@ -34,41 +34,41 @@ import com.netsdo.denguetracker.R;
  * layout of each child is specified in image coordinates (pixels), and the
  * conversion to screen coordinates is performed automatically.
  * <p>The background image is adjusted so that it fills the available space. The exact
- * details of this adjustment are controlled by the custom:fit and android:gravity 
+ * details of this adjustment are controlled by the custom:fit and android:gravity
  * attributes
  * <p>For some applications this might be a useful replacement for the now
  * deprecated AbsoluteLayout.
  */
 public class ImageLayout extends ViewGroup {
-    
+
     /**
-     * The image is made to fill the available vertical space, and may be cropped 
-     * horizontally if there is not enough space. 
-     * <p>If there is too much horizontal space it is left blank. 
+     * The image is made to fill the available vertical space, and may be cropped
+     * horizontally if there is not enough space.
+     * <p>If there is too much horizontal space it is left blank.
      * <p>The vertical position of the image is controlled by the android:gravity attribute
      */
     public static final int FIT_VERTICAL = 0;
     /**
-     * The image is made to fill the available horizontal space, and may be cropped 
-     * vertically if there is not enough space. 
-     * <p>If there is too much vertical space it is left blank. 
+     * The image is made to fill the available horizontal space, and may be cropped
+     * vertically if there is not enough space.
+     * <p>If there is too much vertical space it is left blank.
      * <p>The vertical position of the image is controlled by the android:gravity attribute
      */
     public static final int FIT_HORIZONTAL = 1;
 
     /**
-     * The image fills the available space both vertically and horizontally. 
+     * The image fills the available space both vertically and horizontally.
      * <p>If the aspect ratio of the image does not match exactly the aspect ratio
      * of the available space, the image is cropped either vertically or horizontally,
      * depending on which provides the best fit
      */
     public static final int FIT_BOTH = 2;
- 
+
     /**
      * The image is made to fill the available space vertically in portrait mode
-     * and horizontally in landscape. 
+     * and horizontally in landscape.
      * <p>This is the default mode.
-     * <p>Note that the library does not determine the orientation based on the 
+     * <p>Note that the library does not determine the orientation based on the
      * actual device orientation, but on the relative aspect ratios of the image
      * and the view.
      */
@@ -78,20 +78,27 @@ public class ImageLayout extends ViewGroup {
      * The fit mode that will be used in case the user does not specify one
      */
     public static final int DEFAULT_FIT_MODE = FIT_AUTO;
-    
+    private int fitMode = DEFAULT_FIT_MODE;
     private Bitmap bitmap;
     private Rect bitmapDestRect;
     private int imageWidth;
     private int imageHeight;
     private Rect bitmapSrcRect;
     private ImageFitter fitter;
-    private int fitMode = DEFAULT_FIT_MODE;
     private int gravity = -1;
 
     public ImageLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(false);
         parseAttributes(attrs);
+    }
+
+    private static Bitmap extractBitmapFromDrawable(Drawable drawable) {
+        return ((BitmapDrawable) drawable).getBitmap();
+    }
+
+    private static Rect bitmapRect(Bitmap bitmap) {
+        return new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
     }
 
     private void parseAttributes(AttributeSet attrs) {
@@ -121,19 +128,6 @@ public class ImageLayout extends ViewGroup {
         a.recycle();
     }
 
-    /**
-     * Determines how the background image is drawn
-     * @param newValue Accepted values are {@link ImageLayout#FIT_BOTH}, {@link ImageLayout#FIT_AUTO},
-     *        {@link ImageLayout#FIT_VERTICAL} and {@link ImageLayout#FIT_HORIZONTAL} 
-     */
-    public void setFitMode(int newValue) {
-        if (fitter != null && fitMode == newValue) {
-            return;
-        }
-        fitMode = newValue;
-        rebuildFitter();
-    }
-    
     public void setGravity(int newValue) {
         if (fitter != null && gravity == newValue) {
             return;
@@ -147,9 +141,23 @@ public class ImageLayout extends ViewGroup {
         gravity = newValue;
         rebuildFitter();
     }
-    
+
     public int getFitMode() {
         return fitMode;
+    }
+
+    /**
+     * Determines how the background image is drawn
+     *
+     * @param newValue Accepted values are {@link ImageLayout#FIT_BOTH}, {@link ImageLayout#FIT_AUTO},
+     *                 {@link ImageLayout#FIT_VERTICAL} and {@link ImageLayout#FIT_HORIZONTAL}
+     */
+    public void setFitMode(int newValue) {
+        if (fitter != null && fitMode == newValue) {
+            return;
+        }
+        fitMode = newValue;
+        rebuildFitter();
     }
 
     /**
@@ -163,14 +171,6 @@ public class ImageLayout extends ViewGroup {
         this.imageHeight = imageHeight;
 
         rebuildFitter();
-    }
-
-    private static Bitmap extractBitmapFromDrawable(Drawable drawable) {
-        return ((BitmapDrawable) drawable).getBitmap();
-    }
-
-    private static Rect bitmapRect(Bitmap bitmap) {
-        return new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
     }
 
     private void rebuildFitter() {
@@ -226,15 +226,14 @@ public class ImageLayout extends ViewGroup {
         boolean isExactWidth = widthMode == MeasureSpec.EXACTLY;
         boolean isExactHeight = heightMode == MeasureSpec.EXACTLY;
         float bitmapAspectRatio = (bitmap.getWidth() + getPaddingLeft() + getPaddingRight())
-                                    / ((float)bitmap.getHeight() + getPaddingTop() + getPaddingBottom());
+                / ((float) bitmap.getHeight() + getPaddingTop() + getPaddingBottom());
         if (isExactWidth && !isExactHeight) {
-            height = (int)(width / bitmapAspectRatio);
+            height = (int) (width / bitmapAspectRatio);
             if (heightMode == MeasureSpec.AT_MOST && height > heightSpec) {
                 height = heightSpec;
             }
-        }
-        else if (isExactHeight && !isExactWidth) {
-            width = (int)(height * bitmapAspectRatio);
+        } else if (isExactHeight && !isExactWidth) {
+            width = (int) (height * bitmapAspectRatio);
             if (widthMode == MeasureSpec.AT_MOST && width > widthSpec) {
                 width = widthSpec;
             }
@@ -325,6 +324,26 @@ public class ImageLayout extends ViewGroup {
     private void checkChildLayoutParams(LayoutParams layoutParams) {
     }
 
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
+        return new LayoutParams();
+    }
+
+    @Override
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        return p instanceof LayoutParams;
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        return new LayoutParams(p);
+    }
+
     public static class LayoutParams extends ViewGroup.LayoutParams {
         // In image coords
         public int maxWidth = -1, maxHeight = -1;
@@ -353,36 +372,36 @@ public class ImageLayout extends ViewGroup {
             for (int i = 0; i < N; i++) {
                 int attr = a.getIndex(i);
                 switch (attr) {
-                case R.styleable.ImageLayout_Layout_layout_left:
-                    left = a.getInt(attr, -1);
-                    break;
-                case R.styleable.ImageLayout_Layout_layout_top:
-                    top = a.getInt(attr, -1);
-                    break;
-                case R.styleable.ImageLayout_Layout_layout_right:
-                    right = a.getInt(attr, -1);
-                    break;
-                case R.styleable.ImageLayout_Layout_layout_bottom:
-                    bottom = a.getInt(attr, -1);
-                    break;
-                case R.styleable.ImageLayout_Layout_layout_centerX:
-                    centerX = a.getInt(attr, -1);
-                    break;
-                case R.styleable.ImageLayout_Layout_layout_centerY:
-                    centerY = a.getInt(attr, -1);
-                    break;
-                case R.styleable.ImageLayout_Layout_layout_width:
-                    width = a.getInt(attr, -1);
-                    break;
-                case R.styleable.ImageLayout_Layout_layout_maxWidth:
-                    maxWidth = a.getInt(attr, -1);
-                    break;
-                case R.styleable.ImageLayout_Layout_layout_height:
-                    height = a.getInt(attr, -1);
-                    break;
-                case R.styleable.ImageLayout_Layout_layout_maxHeight:
-                    maxHeight = a.getInt(attr, -1);
-                    break;
+                    case R.styleable.ImageLayout_Layout_layout_left:
+                        left = a.getInt(attr, -1);
+                        break;
+                    case R.styleable.ImageLayout_Layout_layout_top:
+                        top = a.getInt(attr, -1);
+                        break;
+                    case R.styleable.ImageLayout_Layout_layout_right:
+                        right = a.getInt(attr, -1);
+                        break;
+                    case R.styleable.ImageLayout_Layout_layout_bottom:
+                        bottom = a.getInt(attr, -1);
+                        break;
+                    case R.styleable.ImageLayout_Layout_layout_centerX:
+                        centerX = a.getInt(attr, -1);
+                        break;
+                    case R.styleable.ImageLayout_Layout_layout_centerY:
+                        centerY = a.getInt(attr, -1);
+                        break;
+                    case R.styleable.ImageLayout_Layout_layout_width:
+                        width = a.getInt(attr, -1);
+                        break;
+                    case R.styleable.ImageLayout_Layout_layout_maxWidth:
+                        maxWidth = a.getInt(attr, -1);
+                        break;
+                    case R.styleable.ImageLayout_Layout_layout_height:
+                        height = a.getInt(attr, -1);
+                        break;
+                    case R.styleable.ImageLayout_Layout_layout_maxHeight:
+                        maxHeight = a.getInt(attr, -1);
+                        break;
                 }
             }
             a.recycle();
@@ -391,25 +410,5 @@ public class ImageLayout extends ViewGroup {
         LayoutParams(ViewGroup.LayoutParams source) {
             super(source);
         }
-    }
-
-    @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new LayoutParams(getContext(), attrs);
-    }
-
-    @Override
-    protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
-        return new LayoutParams();
-    }
-
-    @Override
-    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-        return p instanceof LayoutParams;
-    }
-
-    @Override
-    protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
-        return new LayoutParams(p);
     }
 }
