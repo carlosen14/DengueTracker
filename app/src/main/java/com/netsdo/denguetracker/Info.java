@@ -6,7 +6,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Info {
@@ -23,6 +25,9 @@ public class Info {
     private String ihow = NULLSTRING;
     private String iwhat = NULLSTRING;
     private String iwhy = NULLSTRING;
+
+    public final static String iwhatListMosBite[] = {"Head", "Body", "RightArm", "RightHand", "RightLeg", "RightFoot", "LeftArm", "LeftHand", "LeftLeg", "LeftFoot"};
+    public final static String ihowList[] = {"MosBite"};
 
     public void setrowid(long rowid) {
         this.rowid = rowid;
@@ -71,7 +76,13 @@ public class Info {
     public String getiwhere(String format) {
         try {
             JSONObject lObj = new JSONObject(iwhere);
-            return String.format(MainActivity.mStringDisplay.getDisplay("iwhere-format" + format), lObj.getString("latitude"), lObj.getString("longitude"), lObj.getString("altitude"), getihow("0"), getiwhat("0"));
+            return String.format(MainActivity.mStringDisplay.getDisplay("iwhere-format" + format),
+                    lObj.getString("latitude"), // %1$s
+                    lObj.getString("longitude"), // %2$s
+                    lObj.getString("altitude"), // %3$s
+                    getihow("0"), // %4$s
+                    getiwhat("0") // %5$s
+            );
         } catch (JSONException e) {
             e.printStackTrace();
 
@@ -79,21 +90,60 @@ public class Info {
         }
     }
 
-    public String getihow(String format) {
-        return MainActivity.mStringDisplay.getDisplay(ihow);
-    }
-
-    public String getiwhat(String format) {
-        return MainActivity.mStringDisplay.getDisplay(iwhat);
-    }
-
     public String getihow() {
+        // return original value
         return ihow;
+    }
+    public String getihow(String format) {
+        // if format = 0, return direct translation without formatting
+        // if format = other, return translation with format specified
+        if (format == "0") {
+            return MainActivity.mStringDisplay.getDisplay(ihow);
+        } else {
+            return String.format(MainActivity.mStringDisplay.getDisplay(ihow + "-format" + format),
+                    ihow // %1$s
+            );
+        }
     }
 
     public String getiwhat() {
+        // return original value
         return iwhat;
     }
+    public String getiwhat(String format) {
+        // if format = 0, return direct translation without formatting
+        // if format = other, return translation with format specified
+        if (format.equals("0")) {
+            return MainActivity.mStringDisplay.getDisplay(iwhat);
+        } else {
+            return String.format(MainActivity.mStringDisplay.getDisplay(iwhat + "-format" + format),
+                    iwhat //%1$s
+            );
+        }
+    }
+    public String[] getlistiwhat() {
+        // return original value
+        return iwhatListMosBite;
+    }
+    public String[] getlistiwhat(String format) {
+        // if format = 0, return direct translation
+        // if format = other, return translation with format specified
+        String [] lList = new String[iwhatListMosBite.length];
+
+        if (format.equals("0")) {
+            for (int i = 0; i< iwhatListMosBite.length; i++) {
+                lList [i] = MainActivity.mStringDisplay.getDisplay(iwhatListMosBite[i]);
+            }
+        } else {
+            for (int i = 0; i< iwhatListMosBite.length; i++) {
+                lList [i] = String.format(MainActivity.mStringDisplay.getDisplay(iwhatListMosBite[i]) + "-format" + format,
+                        iwhat //%1$s
+                );
+            }
+        }
+        return lList;
+    }
+
 
     public String getiwhy() {
         return iwhy;
@@ -139,7 +189,7 @@ public class Info {
             JSONArray lInfo = new JSONArray();
             JSONObject lInfoRec = new JSONObject();
 
-            //todo, add sql and datetime to provide complete format of JSON
+            //todo # add sql and datetime to provide complete format of JSON
             lObj.put("norec", 1);
             lInfoRec.put("position", 0);
             lInfoRec.put("rowid", rowid);

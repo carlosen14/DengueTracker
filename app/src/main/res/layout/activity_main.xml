@@ -10,13 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         class="com.netsdo.denguetracker.MosCompositeFragment"
-        tools:layout="@layout/fragment_composite_mos" />
+        tools:layout="@layout/fragment_mos_acomp" />
 
     <fragment
         android:id="@+id/main_temp_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         class="com.netsdo.denguetracker.TempCompositeFragment"
-        tools:layout="@layout/fragment_composite_temp" />
+        tools:layout="@layout/fragment_temp_acomp" />
 
 </com.netsdo.swipe4d.VerticalPager>

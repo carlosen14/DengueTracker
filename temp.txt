@@ -2,6 +2,5 @@
         android:name="com.google.android.maps.v2.API_KEY"
         android:value="AIzaSyDxEkfvGvKyTVMaYk3PAd9Y2JIKSGErRdI" />
 
-//todo, problem: library compilation can't be included
 :app:compileDebugSources : ok to load module
 :app:assembleDebug       : failed to load module

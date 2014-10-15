@@ -36,7 +36,7 @@ public class MosListFragment extends Fragment {
     private class ItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            //todo, highlight the item after it is clicked.
+            //todo # highlight the item after it is clicked.
             Toast.makeText(mParentActivity, "position:" + position + ", id:" + id + ", rowid:" + mInfoArray.get(position).getrowid(), Toast.LENGTH_SHORT).show();
             EventBus.getInstance().post(new MosEditEvent(id));
             EventBus.getInstance().post(new SwitchToPageEvent(2)); // hardcode to switch to MosEdit
@@ -53,6 +53,8 @@ public class MosListFragment extends Fragment {
             TextView ihow;
             TextView iwhat;
             TextView iwhy;
+            TextView label_iwhen;
+            TextView label_iwhere;
         }
 
         private ArrayList<Info> mmInfoArray;
@@ -95,7 +97,7 @@ public class MosListFragment extends Fragment {
 
             if (child == null) {
                 lLayoutInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE); // must use getActivity
-                child = lLayoutInflater.inflate(R.layout.fragment_mos_item, null);
+                child = lLayoutInflater.inflate(R.layout.item_mos, null);
                 lViewHolder = new ViewHolder();
                 lViewHolder.rowid = (TextView) child.findViewById(R.id.rowid);
                 lViewHolder.iwho = (TextView) child.findViewById(R.id.iwho);
@@ -104,6 +106,8 @@ public class MosListFragment extends Fragment {
                 lViewHolder.ihow = (TextView) child.findViewById(R.id.ihow);
                 lViewHolder.iwhat = (TextView) child.findViewById(R.id.iwhat);
                 lViewHolder.iwhy = (TextView) child.findViewById(R.id.iwhy);
+                lViewHolder.label_iwhen = (TextView) child.findViewById(R.id.label_iwhen);
+                lViewHolder.label_iwhere = (TextView) child.findViewById(R.id.label_iwhere);
                 child.setTag(lViewHolder);
             } else {
                 lViewHolder = (ViewHolder) child.getTag();
@@ -113,10 +117,12 @@ public class MosListFragment extends Fragment {
                 lViewHolder.rowid.setText(String.format("%d", mmInfoArray.get(position).getrowid()));
                 lViewHolder.iwho.setText(""); // not display iwho
                 lViewHolder.iwhen.setText(mmInfoArray.get(position).getiwhen());
-                lViewHolder.iwhere.setText(mmInfoArray.get(position).getiwhere("1")); // display simple format
-                lViewHolder.ihow.setText("Mosquito Bite On"); // fixed value
-                lViewHolder.iwhat.setText(mmInfoArray.get(position).getiwhat());
+                lViewHolder.iwhere.setText(mmInfoArray.get(position).getiwhere("3")); // display simple format
+                lViewHolder.ihow.setText(mmInfoArray.get(position).getihow("0"));
+                lViewHolder.iwhat.setText(mmInfoArray.get(position).getiwhat("0"));
                 lViewHolder.iwhy.setText(""); // not display iwhy
+                lViewHolder.label_iwhen.setText(MainActivity.mStringDisplay.getDisplay("When")); // not display iwhy
+                lViewHolder.label_iwhere.setText(MainActivity.mStringDisplay.getDisplay("Where")); // not display iwhy
             }
 
             return child;
@@ -129,7 +135,7 @@ public class MosListFragment extends Fragment {
         ListView lList = (ListView) lView.findViewById(R.id.bite_list);
 
         mParentActivity = (MainActivity) getActivity();
-        mInfoHandler = mParentActivity.mInfoHandler;
+        mInfoHandler = MainActivity.mInfoHandler;
         mInfoArray = new ArrayList<Info>();
 
         loadInfo(); // Info is loaded into mInfoArray
@@ -188,7 +194,6 @@ public class MosListFragment extends Fragment {
     private boolean loadInfo() {
         // return true if data is changes
         // return false if data is not changed.
-        //todo, to do proper check and return true if data is really changed for performance purpose.
         String lSQL;
         String lInfo;
 

@@ -1,4 +1,13 @@
-//todo, + record and go back to last fragment user used if user restart the app
-//todo, * fragment handling, 1. allow to set any fragment as default vertical fragment, 2. allow show any fragment when activity starts.
-//todo, + fever record
-//todo, * optimize the list loading performance
+version control sign
++ : new item
+# : improve item
+* : fix item
+- : remove item
+
+//todo + fever record
+//todo + record and display to last page user used if user restart the app
+//todo # fragment handling, 1. allow to set any fragment as default vertical fragment, 2. allow show any fragment when activity starts.
+//todo # optimize the list loading performance, only load changed item
+//todo + keep locale preference and load it during startup.
+//todo # review and revise log level
+//todo * library compilation can't be included

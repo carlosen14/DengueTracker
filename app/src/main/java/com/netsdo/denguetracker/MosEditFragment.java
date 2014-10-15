@@ -54,8 +54,8 @@ public class MosEditFragment extends Fragment {
             String clickOn;
             switch (v.getId()) {
                 case R.id.iwhere:
-                    Log.d(TAG, "ClickListener:"+ mInfo.getInfo());
-                    Uri geoLocation = Uri.parse(mInfo.getiwhere("0"));
+                    Log.d(TAG, "ClickListener:" + mInfo.getInfo());
+                    Uri geoLocation = Uri.parse(mInfo.getiwhere("1"));
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setData(geoLocation);
                     if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
@@ -83,19 +83,25 @@ public class MosEditFragment extends Fragment {
         }
 
         public void onScrollingFinished(AbstractWheel wheel) {
+            // 0123456789  0  12345678901234567
+            // yyyy-MM-dd\'T\'HH:mm:ss.SSSZ
             String liwhen = mInfo.getiwhen();
             switch (wheel.getId()) {
                 case R.id.hour:
-                    Log.d(TAG, liwhen.substring(0, 11) + "|" + String.format("%02d", mHourHolder.getCurrentItem()) + "|" + liwhen.substring(13, 28));
+                    Log.d(TAG, liwhen.substring(0, 11) + "T" + String.format("%02d", mHourHolder.getCurrentItem()) + ":" + liwhen.substring(13, 28));
                     mInfo.setiwhen(liwhen.substring(0, 11) + String.format("%02d", mHourHolder.getCurrentItem()) + liwhen.substring(13, 28));
                     break;
                 case R.id.min:
-                    Log.d(TAG, liwhen.substring(0, 14) + "|" + String.format("%02d", mMinHolder.getCurrentItem()) + "|" + liwhen.substring(16, 28));
+                    Log.d(TAG, liwhen.substring(0, 14) + "T" + String.format("%02d", mMinHolder.getCurrentItem()) + ":" + liwhen.substring(16, 28));
                     mInfo.setiwhen(liwhen.substring(0, 14) + String.format("%02d", mMinHolder.getCurrentItem()) + liwhen.substring(16, 28));
                     break;
                 case R.id.day:
+                    Log.d(TAG, (String) mDayAdapter.getItemText(mDayHolder.getCurrentItem()));
+                    mInfo.setiwhen(((String) mDayAdapter.getItemText(mDayHolder.getCurrentItem())).substring(0, 10) + liwhen.substring(10, 28));
                     break;
                 case R.id.iwhat:
+                    Log.d(TAG, (String) miwhatAdapter.getItemText(miwhatHolder.getCurrentItem()));
+                    mInfo.setiwhat(mInfo.getlistiwhat()[miwhatHolder.getCurrentItem()]);
                     break;
                 default:
                     break;
@@ -106,25 +112,22 @@ public class MosEditFragment extends Fragment {
     }
 
     private class DayArrayAdapter extends AbstractWheelTextAdapter {
-        private final int daysCount = 30; // show date back to 3 weeks before
+        //todo # simplify the dayscount configuration
+        private final int daysCount = 30; // show date back to 20 days before and 10 days after
 
         // Calendar
         Calendar calendar;
 
         protected DayArrayAdapter(Context context, Calendar calendar) {
-            super(context, R.layout.time_picker_custom_day, NO_RESOURCE);
+            super(context, R.layout.picker_day, NO_RESOURCE);
 
             this.calendar = calendar;
             setItemTextResource(R.id.time2_monthday);
         }
 
-        public int getToday() {
-            return daysCount;
-        }
-
         @Override
         public View getItem(int index, View cachedView, ViewGroup parent) {
-            int day = -daysCount + index + 10; // set default item to last 10th position
+            int day = -daysCount + index + 10; // set default index to last 10th position
             Calendar newCalendar = (Calendar) calendar.clone();
             newCalendar.roll(Calendar.DAY_OF_YEAR, day);
 
@@ -133,10 +136,10 @@ public class MosEditFragment extends Fragment {
             TextView monthday = (TextView) view.findViewById(R.id.time2_monthday);
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             monthday.setText(format.format(newCalendar.getTime()));
-            if (day == 0) {
-                monthday.setTextColor(0xFF0000F0);
+            if (day > 0) {
+                monthday.setTextColor(0xFF0000F0); // future days
             } else {
-                monthday.setTextColor(0xFF111111);
+                monthday.setTextColor(0xFF111111); // past day
             }
             return view;
         }
@@ -149,9 +152,14 @@ public class MosEditFragment extends Fragment {
         @Override
         protected CharSequence getItemText(int index) {
             Calendar lcalendar = (Calendar) calendar.clone();
-            lcalendar.add(Calendar.DATE, -daysCount + index);
+            lcalendar.add(Calendar.DATE, -daysCount + index + 10); // adjust text index based on default index
 
             return new SimpleDateFormat(context.getString(R.string.iso6301)).format(lcalendar.getTime());
+        }
+
+        @Override
+        protected void notifyDataChangedEvent() {
+            super.notifyDataChangedEvent();
         }
     }
 
@@ -163,7 +171,7 @@ public class MosEditFragment extends Fragment {
         mInfoHandler = mParentActivity.mInfoHandler;
         mInfo = new Info();
 
-        //todo, to solve a problem, during initial loading, the edit page is not triggered to load first record in list page.
+        //todo * during initial loading, the edit page is not triggered to load first record in list page.
         loadInfo();
 
         mrowidHolder = (TextView) lFragment.findViewById(R.id.rowid);
@@ -182,8 +190,8 @@ public class MosEditFragment extends Fragment {
         mMinHolder.setCyclic(true);
 
         miwhatHolder = (AbstractWheel) lFragment.findViewById(R.id.iwhat);
-        miwhatAdapter = new ArrayWheelAdapter<String>(this.getActivity(), new String[]{"Head", "Body", "RightArm", "RightHand", "RightLeg", "RightFoot", "LeftArm", "LeftHand", "LeftLeg", "LeftFoot"});
-        miwhatAdapter.setItemResource(R.layout.wheel_text_centered);
+        miwhatAdapter = new ArrayWheelAdapter<String>(this.getActivity(), mInfo.getlistiwhat("0"));
+        miwhatAdapter.setItemResource(R.layout.picker_string);
         miwhatAdapter.setItemTextResource(R.id.text);
         miwhatHolder.setViewAdapter(miwhatAdapter);
 
@@ -283,13 +291,13 @@ public class MosEditFragment extends Fragment {
 
     private boolean showInfo() {
         mrowidHolder.setText(String.format("%d", mInfo.getrowid()));
-        miwhatHolder.setCurrentItem(2); // todo, to map string into number
-        mDayAdapter.notifyDataChangedEvent();
-        mDayHolder.setCurrentItem(20); // hardcode, todo
+        miwhatHolder.setCurrentItem(Integer.valueOf(mInfo.getiwhat("1")));
+        mDayHolder.setCurrentItem(20); // set to day of iwhen at position 20
+        mDayAdapter.notifyDataChangedEvent(); // refresh mDayHolder
         // 0123456789  0  12345678901234567
         // yyyy-MM-dd\'T\'HH:mm:ss.SSSZ
-        mHourHolder.setCurrentItem(Integer.parseInt(mInfo.getiwhen().substring(11, 13)));
-        mMinHolder.setCurrentItem(Integer.parseInt(mInfo.getiwhen().substring(14, 16)));
+        mHourHolder.setCurrentItem(Integer.valueOf(mInfo.getiwhen().substring(11, 13)));
+        mMinHolder.setCurrentItem(Integer.valueOf(mInfo.getiwhen().substring(14, 16)));
 
         return true;
     }

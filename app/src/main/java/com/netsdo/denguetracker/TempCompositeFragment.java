@@ -36,7 +36,7 @@ public class TempCompositeFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View fragmentView = inflater.inflate(R.layout.fragment_composite_temp, container, false);
+		View fragmentView = inflater.inflate(R.layout.fragment_temp_acomp, container, false);
         mHorizontalPager = (ViewPager) fragmentView.findViewById(R.id.fragment_composite_temp_pager);
 
         initViews();

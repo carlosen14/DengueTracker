@@ -4,37 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/msg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:padding="15sp"
-        android:text="Using customized and horizontal wheel views"
-        android:textSize="14sp" />
-
     <Button
         android:id="@+id/delete"
         android:clickable="true"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_below="@+id/msg"
+        android:layout_height="50dp"
         android:hint="delete"/>
 
     <Button
         android:id="@+id/iwhere"
         android:clickable="true"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="50dp"
         android:layout_below="@+id/delete"
         android:hint="iwhere"/>
-
-    <TextView
-        android:id="@+id/rowid"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|center_vertical"
-        android:hint="1234" />
 
 
     <LinearLayout
@@ -43,6 +26,13 @@
         android:layout_centerInParent="true"
         android:gravity="center"
         android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/rowid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:hint="1234" />
 
         <com.antistatic.spinnerwheel.WheelVerticalView
             android:id="@+id/day"
@@ -70,7 +60,7 @@
             android:id="@+id/iwhat"
             app:selectionDivider="@drawable/divider_dark_gradient_horizontal"
             android:layout_height="wrap_content"
-            android:layout_width="100dp" />
+            android:layout_width="150dp" />
 
     </LinearLayout>
 </RelativeLayout>

@@ -238,7 +238,7 @@ public class VerticalPager extends ViewGroup {
         // the drawing dispatch by drawing only what we know needs to be drawn.
 
         final long drawingTime = getDrawingTime();
-        // todo be smarter about which children need drawing
+        // todo # be smarter about which children need drawing
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             drawChild(canvas, getChildAt(i), drawingTime);

@@ -108,9 +108,8 @@ public class MosBiteFragment extends Fragment {
                 return;
             } else {
                 if (mInfoHandler.insertInfo(lsInfo) == 0) {
-                    Log.d(TAG, "ClickListener, no record lsInfo:" + lsInfo); //todo, show error to user.
+                    Log.d(TAG, "ClickListener, no record lsInfo:" + lsInfo);
                 }
-                ;
             }
         }
     }
@@ -230,7 +229,7 @@ public class MosBiteFragment extends Fragment {
 
                 @Override
                 public void onLocationUpdateTimeoutExceeded(LocationType type) {
-                    Log.d(TAG, "onLocationUpdateTimeoutExceeded, TYPE:" + type);
+//                    Log.d(TAG, "onLocationUpdateTimeoutExceeded, TYPE:" + type);
                 }
 
                 @Override

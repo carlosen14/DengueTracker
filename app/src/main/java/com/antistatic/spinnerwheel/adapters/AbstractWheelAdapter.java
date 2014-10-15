@@ -61,7 +61,7 @@ public abstract class AbstractWheelAdapter implements WheelViewAdapter {
     /**
      * Notifies observers about data changing
      */
-    public void notifyDataChangedEvent() {//todo, change from protected to public for adapter refresh
+    protected void notifyDataChangedEvent() {
         if (datasetObservers != null) {
             for (DataSetObserver observer : datasetObservers) {
                 observer.onChanged();

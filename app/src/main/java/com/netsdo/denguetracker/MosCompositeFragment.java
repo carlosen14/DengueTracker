@@ -40,7 +40,7 @@ public class MosCompositeFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View fragmentView = inflater.inflate(R.layout.fragment_composite_mos, container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_mos_acomp, container, false);
         mHorizontalPager = (ViewPager) fragmentView.findViewById(R.id.fragment_composite_mos_pager);
 
         initViews();
@@ -50,7 +50,7 @@ public class MosCompositeFragment extends Fragment {
 
     private void initViews() {
         populateHorizontalPager();
-        mHorizontalPager.setCurrentItem(mCentralPageIndex); //todo, modify here to display last user visit page.
+        mHorizontalPager.setCurrentItem(mCentralPageIndex); //todo + modify here to record and display to last page user used if user restart the app
         mHorizontalPager.setOnPageChangeListener(new PageChangeListener());
     }
 

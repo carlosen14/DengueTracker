@@ -47,7 +47,7 @@ public class InfoHandler {
             Log.d(TAG, lSQL);
             mDB.execSQL(lSQL);
 
-            return 1; //todo, hardcode
+            return 1; //todo # hardcode
         } catch (JSONException e) {
             e.printStackTrace();
 
@@ -68,7 +68,7 @@ public class InfoHandler {
             Log.d(TAG, lSQL);
             mDB.execSQL(lSQL);
 
-            return 1; //todo, hardcode
+            return 1; //todo # hardcode
         } catch (JSONException e) {
             e.printStackTrace();
 
@@ -86,7 +86,7 @@ public class InfoHandler {
         Log.d(TAG, lSQL);
         mDB.execSQL(lSQL);
 
-        return 1; //todo, hardcode
+        return 1; //todo # hardcode
     }
 
     public long openSelectInfo(String jSQL) {
@@ -269,7 +269,7 @@ public class InfoHandler {
         Log.d(TAG, lSQL);
         mDB.execSQL(lSQL);
 
-        return 1; //todo, hardcode
+        return 1; //todo # hardcode
     }
 
     public void createInfoDB() {

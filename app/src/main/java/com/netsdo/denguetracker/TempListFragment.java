@@ -84,7 +84,7 @@ public class TempListFragment extends Fragment {
             if (convertView == null) {
                 // LayoutInflater class is used to instantiate layout XML file into its corresponding View objects.
                 LayoutInflater layoutInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = layoutInflater.inflate(R.layout.one_raw_of_list, null);
+                convertView = layoutInflater.inflate(R.layout.item_temp, null);
             }
 
             rawTextView = (TextView) convertView.findViewById(R.id.rawTextView);
@@ -100,7 +100,7 @@ public class TempListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		View fragmentView = inflater.inflate(R.layout.custom_listview, container, false);
+		View fragmentView = inflater.inflate(R.layout.fragment_temp_list, container, false);
 
         // To show the books in a list
         bookListView = (ListView) fragmentView.findViewById(R.id.booksListView);
