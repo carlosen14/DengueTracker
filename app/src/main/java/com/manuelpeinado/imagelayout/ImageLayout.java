@@ -327,7 +327,7 @@ public class ImageLayout extends ViewGroup {
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new LayoutParams(getContext(), attrs);
-    }
+    };
 
     @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
