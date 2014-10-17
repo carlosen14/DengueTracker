@@ -1,6 +1,4 @@
-package com.netsdo.swipe4d;
-
-import android.util.Log;
+package com.netsdo.swipe4d.events;
 
 public class MosEditEvent {
     private static String TAG = "MosEditEvent";

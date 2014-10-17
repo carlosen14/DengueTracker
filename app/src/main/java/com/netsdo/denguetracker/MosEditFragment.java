@@ -1,15 +1,5 @@
 package com.netsdo.denguetracker;
 
-import com.antistatic.spinnerwheel.AbstractWheel;
-import com.antistatic.spinnerwheel.OnWheelScrollListener;
-import com.antistatic.spinnerwheel.adapters.AbstractWheelTextAdapter;
-import com.antistatic.spinnerwheel.adapters.ArrayWheelAdapter;
-import com.antistatic.spinnerwheel.adapters.NumericWheelAdapter;
-import com.netsdo.swipe4d.EventBus;
-import com.netsdo.swipe4d.MosEditEvent;
-import com.netsdo.swipe4d.SwitchToPageEvent;
-import com.squareup.otto.Subscribe;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -22,6 +12,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.antistatic.spinnerwheel.AbstractWheel;
+import com.antistatic.spinnerwheel.OnWheelScrollListener;
+import com.antistatic.spinnerwheel.adapters.AbstractWheelTextAdapter;
+import com.antistatic.spinnerwheel.adapters.ArrayWheelAdapter;
+import com.antistatic.spinnerwheel.adapters.NumericWheelAdapter;
+import com.netsdo.swipe4d.EventBus;
+import com.netsdo.swipe4d.events.MosEditEvent;
+import com.netsdo.swipe4d.events.SwitchToPageEvent;
+import com.squareup.otto.Subscribe;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -47,121 +47,6 @@ public class MosEditFragment extends Fragment {
     private AbstractWheel mHourHolder;
     private AbstractWheel mMinHolder;
     private AbstractWheel miwhatHolder;
-
-    private class ClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            String clickOn;
-            switch (v.getId()) {
-                case R.id.iwhere:
-                    Log.d(TAG, "ClickListener:" + mInfo.getInfo());
-                    Uri geoLocation = Uri.parse(mInfo.getiwhere("1"));
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(geoLocation);
-                    if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                        startActivity(intent);
-                    }
-                    clickOn = "iwhere";
-                    break;
-                case R.id.delete:
-                    if (mInfo.getrowid() != Info.NULLLONG) {
-                        mInfoHandler.deleteInfo(mInfo.getrowid());
-                    }
-                    EventBus.getInstance().post(new SwitchToPageEvent(1)); // hardcode to switch back to MosList
-                    clickOn = "delete";
-                    break;
-                default:
-                    clickOn = "Unknown";
-            }
-            Log.d(TAG, "onClick, " + clickOn);
-        }
-    }
-
-    private class WheelScrollListener implements OnWheelScrollListener {
-        public void onScrollingStarted(AbstractWheel wheel) {
-            // not use the event
-        }
-
-        public void onScrollingFinished(AbstractWheel wheel) {
-            // 0123456789  0  12345678901234567
-            // yyyy-MM-dd\'T\'HH:mm:ss.SSSZ
-            String liwhen = mInfo.getiwhen();
-            switch (wheel.getId()) {
-                case R.id.hour:
-                    Log.d(TAG, liwhen.substring(0, 11) + "T" + String.format("%02d", mHourHolder.getCurrentItem()) + ":" + liwhen.substring(13, 28));
-                    mInfo.setiwhen(liwhen.substring(0, 11) + String.format("%02d", mHourHolder.getCurrentItem()) + liwhen.substring(13, 28));
-                    break;
-                case R.id.min:
-                    Log.d(TAG, liwhen.substring(0, 14) + "T" + String.format("%02d", mMinHolder.getCurrentItem()) + ":" + liwhen.substring(16, 28));
-                    mInfo.setiwhen(liwhen.substring(0, 14) + String.format("%02d", mMinHolder.getCurrentItem()) + liwhen.substring(16, 28));
-                    break;
-                case R.id.day:
-                    Log.d(TAG, (String) mDayAdapter.getItemText(mDayHolder.getCurrentItem()));
-                    mInfo.setiwhen(((String) mDayAdapter.getItemText(mDayHolder.getCurrentItem())).substring(0, 10) + liwhen.substring(10, 28));
-                    break;
-                case R.id.iwhat:
-                    Log.d(TAG, (String) miwhatAdapter.getItemText(miwhatHolder.getCurrentItem()));
-                    mInfo.setiwhat(mInfo.getlistiwhat()[miwhatHolder.getCurrentItem()]);
-                    break;
-                default:
-                    break;
-            }
-            Toast.makeText(wheel.getContext(), "iwhen:" + mDayAdapter.getItemText(mDayHolder.getCurrentItem()) + String.format("%02d", mHourHolder.getCurrentItem()) + ":" + String.format("%02d", mMinHolder.getCurrentItem()) + ", iwhat:" + miwhatAdapter.getItemText(miwhatHolder.getCurrentItem()), Toast.LENGTH_SHORT).show();
-            updateInfo();
-        }
-    }
-
-    private class DayArrayAdapter extends AbstractWheelTextAdapter {
-        //todo # simplify the dayscount configuration
-        private final int daysCount = 30; // show date back to 20 days before and 10 days after
-
-        // Calendar
-        Calendar calendar;
-
-        protected DayArrayAdapter(Context context, Calendar calendar) {
-            super(context, R.layout.picker_day, NO_RESOURCE);
-
-            this.calendar = calendar;
-            setItemTextResource(R.id.time2_monthday);
-        }
-
-        @Override
-        public View getItem(int index, View cachedView, ViewGroup parent) {
-            int day = -daysCount + index + 10; // set default index to last 10th position
-            Calendar newCalendar = (Calendar) calendar.clone();
-            newCalendar.roll(Calendar.DAY_OF_YEAR, day);
-
-            View view = super.getItem(index, cachedView, parent);
-
-            TextView monthday = (TextView) view.findViewById(R.id.time2_monthday);
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            monthday.setText(format.format(newCalendar.getTime()));
-            if (day > 0) {
-                monthday.setTextColor(0xFF0000F0); // future days
-            } else {
-                monthday.setTextColor(0xFF111111); // past day
-            }
-            return view;
-        }
-
-        @Override
-        public int getItemsCount() {
-            return daysCount + 1;
-        }
-
-        @Override
-        protected CharSequence getItemText(int index) {
-            Calendar lcalendar = (Calendar) calendar.clone();
-            lcalendar.add(Calendar.DATE, -daysCount + index + 10); // adjust text index based on default index
-
-            return new SimpleDateFormat(context.getString(R.string.iso6301)).format(lcalendar.getTime());
-        }
-
-        @Override
-        protected void notifyDataChangedEvent() {
-            super.notifyDataChangedEvent();
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -304,5 +189,120 @@ public class MosEditFragment extends Fragment {
 
     private long updateInfo() {
         return mInfoHandler.updateInfo(mInfo.getInfo());
+    }
+
+    private class ClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            String clickOn;
+            switch (v.getId()) {
+                case R.id.iwhere:
+                    Log.d(TAG, "ClickListener:" + mInfo.getInfo());
+                    Uri geoLocation = Uri.parse(mInfo.getiwhere("1"));
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(geoLocation);
+                    if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+                    clickOn = "iwhere";
+                    break;
+                case R.id.delete:
+                    if (mInfo.getrowid() != Info.NULLLONG) {
+                        mInfoHandler.deleteInfo(mInfo.getrowid());
+                    }
+                    EventBus.getInstance().post(new SwitchToPageEvent(1)); // hardcode to switch back to MosList
+                    clickOn = "delete";
+                    break;
+                default:
+                    clickOn = "Unknown";
+            }
+            Log.d(TAG, "onClick, " + clickOn);
+        }
+    }
+
+    private class WheelScrollListener implements OnWheelScrollListener {
+        public void onScrollingStarted(AbstractWheel wheel) {
+            // not use the event
+        }
+
+        public void onScrollingFinished(AbstractWheel wheel) {
+            // 0123456789  0  12345678901234567
+            // yyyy-MM-dd\'T\'HH:mm:ss.SSSZ
+            String liwhen = mInfo.getiwhen();
+            switch (wheel.getId()) {
+                case R.id.hour:
+                    Log.d(TAG, liwhen.substring(0, 11) + "T" + String.format("%02d", mHourHolder.getCurrentItem()) + ":" + liwhen.substring(13, 28));
+                    mInfo.setiwhen(liwhen.substring(0, 11) + String.format("%02d", mHourHolder.getCurrentItem()) + liwhen.substring(13, 28));
+                    break;
+                case R.id.min:
+                    Log.d(TAG, liwhen.substring(0, 14) + "T" + String.format("%02d", mMinHolder.getCurrentItem()) + ":" + liwhen.substring(16, 28));
+                    mInfo.setiwhen(liwhen.substring(0, 14) + String.format("%02d", mMinHolder.getCurrentItem()) + liwhen.substring(16, 28));
+                    break;
+                case R.id.day:
+                    Log.d(TAG, (String) mDayAdapter.getItemText(mDayHolder.getCurrentItem()));
+                    mInfo.setiwhen(((String) mDayAdapter.getItemText(mDayHolder.getCurrentItem())).substring(0, 10) + liwhen.substring(10, 28));
+                    break;
+                case R.id.iwhat:
+                    Log.d(TAG, (String) miwhatAdapter.getItemText(miwhatHolder.getCurrentItem()));
+                    mInfo.setiwhat(mInfo.getlistiwhat()[miwhatHolder.getCurrentItem()]);
+                    break;
+                default:
+                    break;
+            }
+            Toast.makeText(wheel.getContext(), "iwhen:" + mDayAdapter.getItemText(mDayHolder.getCurrentItem()) + String.format("%02d", mHourHolder.getCurrentItem()) + ":" + String.format("%02d", mMinHolder.getCurrentItem()) + ", iwhat:" + miwhatAdapter.getItemText(miwhatHolder.getCurrentItem()), Toast.LENGTH_SHORT).show();
+            updateInfo();
+        }
+    }
+
+    private class DayArrayAdapter extends AbstractWheelTextAdapter {
+        //todo # simplify the dayscount configuration
+        private final int daysCount = 30; // show date back to 20 days before and 10 days after
+
+        // Calendar
+        Calendar calendar;
+
+        protected DayArrayAdapter(Context context, Calendar calendar) {
+            super(context, R.layout.picker_day, NO_RESOURCE);
+
+            this.calendar = calendar;
+            setItemTextResource(R.id.time2_monthday);
+        }
+
+        @Override
+        public View getItem(int index, View cachedView, ViewGroup parent) {
+            int day = -daysCount + index + 10; // set default index to last 10th position
+            Calendar newCalendar = (Calendar) calendar.clone();
+            newCalendar.roll(Calendar.DAY_OF_YEAR, day);
+
+            View view = super.getItem(index, cachedView, parent);
+
+            TextView monthday = (TextView) view.findViewById(R.id.time2_monthday);
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            monthday.setText(format.format(newCalendar.getTime()));
+            if (day > 0) {
+                monthday.setTextColor(0xFF0000F0); // future days
+            } else {
+                monthday.setTextColor(0xFF111111); // past day
+            }
+            return view;
+        }
+
+        @Override
+        public int getItemsCount() {
+            return daysCount + 1;
+        }
+
+        @Override
+        protected CharSequence getItemText(int index) {
+            Calendar lcalendar = (Calendar) calendar.clone();
+            lcalendar.add(Calendar.DATE, -daysCount + index + 10); // adjust text index based on default index
+
+            return new SimpleDateFormat(context.getString(R.string.iso6301)).format(lcalendar.getTime());
+        }
+
+        @Override
+        protected void notifyDataChangedEvent() {
+            super.notifyDataChangedEvent();
+        }
     }
 }

@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.netsdo.swipe4d.EventBus;
-import com.netsdo.swipe4d.VerticalPagerSwitchedEvent;
+import com.netsdo.swipe4d.events.VerticalPagerSwitchedEvent;
 import com.squareup.otto.Subscribe;
 
 public class TempRecFragment extends Fragment {

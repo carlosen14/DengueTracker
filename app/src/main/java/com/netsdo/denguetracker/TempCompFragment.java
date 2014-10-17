@@ -10,33 +10,19 @@ import android.view.ViewGroup;
 
 import com.netsdo.swipe4d.EventBus;
 import com.netsdo.swipe4d.FragmentsClassesPagerAdapter;
-import com.netsdo.swipe4d.PageChangedEvent;
+import com.netsdo.swipe4d.events.HorizontalPagerSwitchedEvent;
 
 import java.util.ArrayList;
 
-public class TempCompositeFragment extends Fragment {
-    private static String TAG = "TempCompositeFragment";
+public class TempCompFragment extends Fragment {
+    private static String TAG = "TempCompFragment";
 
 	private ViewPager mHorizontalPager;
 	private int mCentralPageIndex = 0;
-	private class PageChangeListener implements OnPageChangeListener {
-		@Override
-		public void onPageSelected(int position) {
-			EventBus.getInstance().post(new PageChangedEvent(mCentralPageIndex == position));
-		}
-
-		@Override
-		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-		}
-
-		@Override
-		public void onPageScrollStateChanged(int state) {
-		}
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View fragmentView = inflater.inflate(R.layout.fragment_temp_acomp, container, false);
+		View fragmentView = inflater.inflate(R.layout.fragment_temp_comp, container, false);
         mHorizontalPager = (ViewPager) fragmentView.findViewById(R.id.fragment_composite_temp_pager);
 
         initViews();
@@ -56,5 +42,20 @@ public class TempCompositeFragment extends Fragment {
 		pages.add(TempListFragment.class);
 		mCentralPageIndex = pages.indexOf(TempRecFragment.class);
 		mHorizontalPager.setAdapter(new FragmentsClassesPagerAdapter(getChildFragmentManager(), getActivity(), pages));
+	}
+
+	private class PageChangeListener implements OnPageChangeListener {
+		@Override
+		public void onPageSelected(int position) {
+			EventBus.getInstance().post(new HorizontalPagerSwitchedEvent(mCentralPageIndex == position));
+		}
+
+		@Override
+		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+		}
+
+		@Override
+		public void onPageScrollStateChanged(int state) {
+		}
 	}
 }

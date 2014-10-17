@@ -11,12 +11,11 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.netsdo.swipe4d.EventBus;
-import com.netsdo.swipe4d.MosEditEvent;
-import com.netsdo.swipe4d.PageChangedEvent;
-import com.netsdo.swipe4d.SwitchToPageEvent;
+import com.netsdo.swipe4d.events.HorizontalPagerSwitchedEvent;
+import com.netsdo.swipe4d.events.MosEditEvent;
+import com.netsdo.swipe4d.events.SwitchToPageEvent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,29 +32,136 @@ public class MosListFragment extends Fragment {
     private MosListAdapter mAdapter;
     private ArrayList<Info> mInfoArray;
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View lView = inflater.inflate(R.layout.fragment_mos_list, container, false);
+        ListView lList = (ListView) lView.findViewById(R.id.bite_list);
+
+        mParentActivity = (MainActivity) getActivity();
+        mInfoHandler = MainActivity.mInfoHandler;
+        mInfoArray = new ArrayList<Info>();
+
+        loadInfo(); // Info is loaded into mInfoArray
+
+        mAdapter = new MosListAdapter(mInfoArray);
+        lList.setAdapter(mAdapter);
+
+        lList.setOnItemClickListener(new ItemClickListener());
+
+        return lView;
+    }
+
+    @Override
+    public void onResume() {
+        Log.d(TAG, "onResume");
+        super.onResume();
+
+        onActive();
+    }
+
+    @Override
+    public void onPause() {
+        Log.d(TAG, "onPause");
+
+        onInActive();
+
+        super.onPause();
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (isVisibleToUser) {
+            Log.d(TAG, "setUserVisibleHintTrue");
+            onActive();
+        } else {
+            Log.d(TAG, "setUserVisibleHintFalse");
+            onInActive();
+        }
+    }
+
+    public void onActive() {
+        Log.d(TAG, "onActive");
+
+        if (loadInfo()) {
+            showInfo();
+        }
+        EventBus.getInstance().post(new HorizontalPagerSwitchedEvent(false)); // shortcut to prevent vertical scroll if the fragment is not main page and active at beginning (onPageSelected is not called at this scenario). todo,
+    }
+
+    public void onInActive() {
+        Log.d(TAG, "onInActive");
+    }
+
+    private boolean loadInfo() {
+        // return true if data is changes
+        // return false if data is not changed.
+        String lSQL;
+        String lInfo;
+
+        if (mInfoArray == null) {
+            return false; // no data
+        }
+
+        mInfoArray.clear();
+
+        try {
+            lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE ihow = 'MosBite' ORDER BY iwhen DESC;";
+            JSONObject lObj = new JSONObject();
+            lObj.put("sql", lSQL);
+            lInfo = mInfoHandler.selectInfo(lObj.toString());
+            if (lInfo == null) {
+                return true; // no data found, data is changed
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return false; // error, consider data is not changed
+        }
+
+        try {
+            JSONObject lObj = new JSONObject(lInfo);
+            long lNoRec = lObj.getLong("norec");
+            JSONArray lInfoObj = lObj.getJSONArray("info");
+            for (int i = 0; i < lNoRec; i++) {
+                JSONObject lInfoRec = lInfoObj.getJSONObject(i);
+                JSONArray lsInfo = new JSONArray();
+                JSONObject lsObj = new JSONObject();
+                lsInfo.put(lInfoRec);
+                lsObj.put("info", lsInfo);
+                Info lcInfo = new Info();
+                if (lcInfo.setInfo(lsObj.toString())) {//reconstruct a record in JSON and assign it to array
+                    mInfoArray.add(lcInfo);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return false; // error, consider data is not changed.
+        }
+
+        return true; // data is changed.
+    }
+
+    private boolean showInfo() {
+        mAdapter.notifyDataSetChanged(); // refresh screen after new data is loaded.
+        EventBus.getInstance().post(new MosEditEvent(mInfoArray.get(0).getrowid())); // hardcode to pass first record to edit page to load as default, todo
+
+        return true;
+    }
+
     private class ItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            //todo # highlight the item after it is clicked.
-            Toast.makeText(mParentActivity, "position:" + position + ", id:" + id + ", rowid:" + mInfoArray.get(position).getrowid(), Toast.LENGTH_SHORT).show();
-            EventBus.getInstance().post(new MosEditEvent(id));
+            view.setSelected(true);
+            Log.d(TAG, "onItemClick, POSITION:" + position + ", ID:" + id + ", rowid:" + mInfoArray.get(position).getrowid());
+            EventBus.getInstance().post(new MosEditEvent(id)); // id is item key set in getItemId
             EventBus.getInstance().post(new SwitchToPageEvent(2)); // hardcode to switch to MosEdit
         }
     }
 
     public class MosListAdapter extends BaseAdapter {
-
-        public class ViewHolder {
-            TextView rowid;
-            TextView iwho;
-            TextView iwhen;
-            TextView iwhere;
-            TextView ihow;
-            TextView iwhat;
-            TextView iwhy;
-            TextView label_iwhen;
-            TextView label_iwhere;
-        }
 
         private ArrayList<Info> mmInfoArray;
 
@@ -121,130 +227,23 @@ public class MosListFragment extends Fragment {
                 lViewHolder.ihow.setText(mmInfoArray.get(position).getihow("0"));
                 lViewHolder.iwhat.setText(mmInfoArray.get(position).getiwhat("0"));
                 lViewHolder.iwhy.setText(""); // not display iwhy
-                lViewHolder.label_iwhen.setText(MainActivity.mStringDisplay.getDisplay("When")); // not display iwhy
-                lViewHolder.label_iwhere.setText(MainActivity.mStringDisplay.getDisplay("Where")); // not display iwhy
+                lViewHolder.label_iwhen.setText(MainActivity.mStringDisplay.getDisplay("When")); // display when label
+                lViewHolder.label_iwhere.setText(MainActivity.mStringDisplay.getDisplay("Where")); // display where label
             }
 
             return child;
         }
-    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View lView = inflater.inflate(R.layout.fragment_mos_list, container, false);
-        ListView lList = (ListView) lView.findViewById(R.id.bite_list);
-
-        mParentActivity = (MainActivity) getActivity();
-        mInfoHandler = MainActivity.mInfoHandler;
-        mInfoArray = new ArrayList<Info>();
-
-        loadInfo(); // Info is loaded into mInfoArray
-
-        mAdapter = new MosListAdapter(mInfoArray);
-        lList.setAdapter(mAdapter);
-
-        lList.setOnItemClickListener(new ItemClickListener());
-
-        return lView;
-    }
-
-    @Override
-    public void onResume() {
-        Log.d(TAG, "onResume");
-        super.onResume();
-
-        onActive();
-    }
-
-    @Override
-    public void onPause() {
-        Log.d(TAG, "onPause");
-
-        onInActive();
-
-        super.onPause();
-    }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-
-        if (isVisibleToUser) {
-            Log.d(TAG, "setUserVisibleHintTrue");
-            onActive();
-        } else {
-            Log.d(TAG, "setUserVisibleHintFalse");
-            onInActive();
+        public class ViewHolder {
+            TextView rowid;
+            TextView iwho;
+            TextView iwhen;
+            TextView iwhere;
+            TextView ihow;
+            TextView iwhat;
+            TextView iwhy;
+            TextView label_iwhen;
+            TextView label_iwhere;
         }
-    }
-
-    public void onActive() {
-        Log.d(TAG, "onActive");
-
-        if (loadInfo()) {
-            showInfo();
-        }
-        EventBus.getInstance().post(new PageChangedEvent(false)); // shortcut to prevent vertical scroll if the fragment is not main page and active at beginning (onPageSelected is not called at this scenario). todo,
-    }
-
-    public void onInActive() {
-        Log.d(TAG, "onInActive");
-    }
-
-    private boolean loadInfo() {
-        // return true if data is changes
-        // return false if data is not changed.
-        String lSQL;
-        String lInfo;
-
-        if (mInfoArray == null) {
-            return false; // no data
-        }
-
-        mInfoArray.clear();
-
-        try {
-            lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE ihow = 'MosBite' ORDER BY iwhen DESC;";
-            JSONObject lObj = new JSONObject();
-            lObj.put("sql", lSQL);
-            lInfo = mInfoHandler.selectInfo(lObj.toString());
-            if (lInfo == null) {
-                return true; // no data found, data is changed
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return false; // error, consider data is not changed
-        }
-
-        try {
-            JSONObject lObj = new JSONObject(lInfo);
-            long lNoRec = lObj.getLong("norec");
-            JSONArray lInfoObj = lObj.getJSONArray("info");
-            for (int i = 0; i < lNoRec; i++) {
-                JSONObject lInfoRec = lInfoObj.getJSONObject(i);
-                JSONArray lsInfo = new JSONArray();
-                JSONObject lsObj = new JSONObject();
-                lsInfo.put(lInfoRec);
-                lsObj.put("info", lsInfo);
-                Info lcInfo = new Info();
-                if (lcInfo.setInfo(lsObj.toString())) {//reconstruct a record in JSON and assign it to array
-                    mInfoArray.add(lcInfo);
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return false; // error, consider data is not changed.
-        }
-
-        return true; // data is changed.
-    }
-
-    private  boolean showInfo () {
-        mAdapter.notifyDataSetChanged(); // refresh screen after new data is loaded.
-        EventBus.getInstance().post(new MosEditEvent(mInfoArray.get(0).getrowid())); // hardcode to pass first record to edit page to load as default, todo
-
-        return true;
     }
 }

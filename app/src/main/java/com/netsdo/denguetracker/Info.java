@@ -6,55 +6,47 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
 public class Info {
-    private static String TAG = "Info";
-
     public final static long NULLLONG = -1; // reserved to indicate null Long
+    private long rowid = NULLLONG;
     public final static long ZEROLONG = 0; // reserved to indicate new record
     public final static String NULLSTRING = "null"; // reserved to indicate null String, used for data output only.
-
-    private long rowid = NULLLONG;
     private String iwho = NULLSTRING;
     private String iwhen = NULLSTRING;
     private String iwhere = NULLSTRING;
     private String ihow = NULLSTRING;
     private String iwhat = NULLSTRING;
     private String iwhy = NULLSTRING;
-
     public final static String iwhatListMosBite[] = {"Head", "Body", "RightArm", "RightHand", "RightLeg", "RightFoot", "LeftArm", "LeftHand", "LeftLeg", "LeftFoot"};
     public final static String ihowList[] = {"MosBite"};
+    private static String TAG = "Info";
 
     public void setrowid(long rowid) {
         this.rowid = rowid;
     }
 
     public void setiwho(String iwho) {
-        this.iwho = iwho;
+        this.iwho = (iwho == null ? NULLSTRING : iwho);
     }
 
     public void setiwhen(String iwhen) {
-        this.iwhen = iwhen;
+        this.iwhen = (iwhen == null ? NULLSTRING : iwhen);
     }
 
     public void setiwhere(String iwhere) {
-        this.iwhere = iwhere;
+        this.iwhere = (iwhere == null ? NULLSTRING : iwhere);
     }
 
     public void setihow(String ihow) {
-        this.ihow = ihow;
+        this.ihow = (ihow == null ? NULLSTRING : ihow);
     }
 
     public void setiwhat(String iwhat) {
-        this.iwhat = iwhat;
+        this.iwhat = (iwhat == null ? NULLSTRING : iwhat);
     }
 
     public void setiwhy(String iwhy) {
-        this.iwhy = iwhy;
+        this.iwhy = (iwhy == null ? NULLSTRING : iwhy);
     }
 
     public long getrowid() {
@@ -193,12 +185,12 @@ public class Info {
             lObj.put("norec", 1);
             lInfoRec.put("position", 0);
             lInfoRec.put("rowid", rowid);
-            lInfoRec.put("iwho", iwho == null ? NULLSTRING : iwho);
-            lInfoRec.put("iwhen", iwhen == null ? NULLSTRING : iwhen);
-            lInfoRec.put("iwhere", iwhere == null ? NULLSTRING : new JSONObject(iwhere));
-            lInfoRec.put("ihow", ihow == null ? NULLSTRING : ihow);
-            lInfoRec.put("iwhat", iwhat == null ? NULLSTRING : iwhat);
-            lInfoRec.put("iwhy", iwhy == null ? NULLSTRING : iwhy);
+            lInfoRec.put("iwho", iwho);
+            lInfoRec.put("iwhen", iwhen);
+            lInfoRec.put("iwhere", new JSONObject(iwhere));
+            lInfoRec.put("ihow", ihow);
+            lInfoRec.put("iwhat", iwhat);
+            lInfoRec.put("iwhy", iwhy);
             lInfo.put(lInfoRec);
             lObj.put("info", lInfo);
             Log.d(TAG, "getInfo, jInfo:" + lObj.toString());

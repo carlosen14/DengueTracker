@@ -1,24 +1,17 @@
-package com.netsdo.swipe4d;
+package com.netsdo.swipe4d.events;
 
 /**
  * Dispatched when the current selected page of the application navigation changed. E.g. user swipes from the center
  * page to the left page.
  */
-public class PageChangedEvent {
+public class HorizontalPagerSwitchedEvent {
+    private final static String TAG = "HorizontalPagerSwitchedEvent";
 
 	// -----------------------------------------------------------------------
 	//
 	// Constructors
 	//
 	// -----------------------------------------------------------------------
-	/**
-	 * @param hasVerticalNeighbors
-	 *            true if the current selected page has vertical (below and/or above) neighbor pages, false - if not.
-	 */
-	public PageChangedEvent(boolean hasVerticalNeighbors) {
-		mHasVerticalNeighbors = hasVerticalNeighbors;
-	}
-
 	// -----------------------------------------------------------------------
 	//
 	// Fields
@@ -26,11 +19,20 @@ public class PageChangedEvent {
 	// -----------------------------------------------------------------------
 	private boolean mHasVerticalNeighbors = true;
 
+	/**
+	 * @param hasVerticalNeighbors
+	 *            true if the current selected page has vertical (below and/or above) neighbor pages, false - if not.
+	 */
+	public HorizontalPagerSwitchedEvent(boolean hasVerticalNeighbors) {
+		mHasVerticalNeighbors = hasVerticalNeighbors;
+	}
+
 	// -----------------------------------------------------------------------
 	//
 	// Methods
 	//
 	// -----------------------------------------------------------------------
+
 	/**
 	 * @return true if the page has vertical (below and/or above) neighbor pages, false - if not.
 	 */

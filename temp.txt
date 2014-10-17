@@ -4,3 +4,38 @@
 
 :app:compileDebugSources : ok to load module
 :app:assembleDebug       : failed to load module
+
+temperature
+# oral temperature that is over 100.4 degrees F (38 C)
+# temporiture record
+# medicine,
+
+## measure, alert
+###taking temp, Fahrenheit, Celsius
+### taking blood pressure
+### taking heart rate
+### blood test
+
+viral or bacterial infections
+virus or bacteria
+antibodies
+antibiotic -> bacteria
+
+## medicine taking (age, weight, height, gender), alert
+### antibiotic
+### can not apply aspirin
+
+## symptom
+cough/sneezing
+running nose
+headache
+vomiting
+Nausea
+diarrhea
+urinate
+stool
+joint pain
+muscle pain
+Skin rash
+nose bleed, bleeding gums, or easy bruising
+panadol

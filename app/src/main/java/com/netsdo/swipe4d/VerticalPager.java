@@ -53,17 +53,12 @@ package com.netsdo.swipe4d;
  * limitations under the License.
  */
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -73,7 +68,11 @@ import android.view.ViewParent;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
 
-import com.netsdo.swipe4d.EventBus;
+import com.netsdo.swipe4d.events.VerticalPagerSwitchedEvent;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This is a slightly modified version of the vertical pager by Grantland Chew: <br>
@@ -96,13 +95,10 @@ public class VerticalPager extends ViewGroup {
      * Instant page snap duration in milliseconds.
      */
     public static final int PAGE_SNAP_DURATION_INSTANT = 1;
-
-    private boolean mIsPagingEnabled = true;
-
     public static final String TAG = "VerticalPager";
-
-    private static final int INVALID_SCREEN = -1;
     public static final int SPEC_UNDEFINED = -1;
+    private static final int INVALID_SCREEN = -1;
+    private int mNextPage = INVALID_SCREEN;
     private static final int TOP = 0;
     private static final int BOTTOM = 1;
 
@@ -110,29 +106,20 @@ public class VerticalPager extends ViewGroup {
      * The velocity at which a fling gesture will cause us to snap to the next screen
      */
     private static final int SNAP_VELOCITY = 1000;
-
+    private final static int TOUCH_STATE_REST = 0;
+    private int mTouchState = TOUCH_STATE_REST;
+    private final static int TOUCH_STATE_SCROLLING = 1;
+    private boolean mIsPagingEnabled = true;
     private int pageHeight;
     private int measuredHeight;
-
     private boolean mFirstLayout = true;
-
     private int mCurrentPage;
-    private int mNextPage = INVALID_SCREEN;
-
     private Scroller mScroller;
     private VelocityTracker mVelocityTracker;
-
     private int mTouchSlop;
     private int mMaximumVelocity;
-
     private float mLastMotionY;
     private float mLastMotionX;
-
-    private final static int TOUCH_STATE_REST = 0;
-    private final static int TOUCH_STATE_SCROLLING = 1;
-
-    private int mTouchState = TOUCH_STATE_REST;
-
     private boolean mAllowLongPress;
 
     private Set<OnScrollListener> mListeners = new HashSet<OnScrollListener>();
@@ -412,19 +399,19 @@ public class VerticalPager extends ViewGroup {
     }
 
     /**
+     * @return true - if pages switching enabled, false - otherwise.
+     */
+    public boolean isPagingEnabled() {
+        return mIsPagingEnabled;
+    }
+
+    /**
      * Enable or disable pages switching.
      *
      * @param enabled true - enable pages switching, false - disable.
      */
     public void setPagingEnabled(boolean enabled) {
         mIsPagingEnabled = enabled;
-    }
-
-    /**
-     * @return true - if pages switching enabled, false - otherwise.
-     */
-    public boolean isPagingEnabled() {
-        return mIsPagingEnabled;
     }
 
     private void checkStartScroll(float x, float y) {
@@ -658,35 +645,6 @@ public class VerticalPager extends ViewGroup {
         return mAllowLongPress;
     }
 
-    public static class SavedState extends BaseSavedState {
-        int currentScreen = -1;
-
-        SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        private SavedState(Parcel in) {
-            super(in);
-            currentScreen = in.readInt();
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeInt(currentScreen);
-        }
-
-        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
-
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
-    }
-
     public void addOnScrollListener(OnScrollListener listener) {
         mListeners.add(listener);
     }
@@ -714,5 +672,33 @@ public class VerticalPager extends ViewGroup {
          * @param currentPage The current page
          */
         void onViewScrollFinished(int currentPage);
+    }
+
+    public static class SavedState extends BaseSavedState {
+        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+        int currentScreen = -1;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            currentScreen = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(currentScreen);
+        }
     }
 }

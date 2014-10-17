@@ -11,42 +11,27 @@ import android.view.ViewGroup;
 
 import com.netsdo.swipe4d.EventBus;
 import com.netsdo.swipe4d.FragmentsClassesPagerAdapter;
-import com.netsdo.swipe4d.PageChangedEvent;
-import com.netsdo.swipe4d.SwitchToPageEvent;
+import com.netsdo.swipe4d.events.HorizontalPagerSwitchedEvent;
+import com.netsdo.swipe4d.events.SwitchToPageEvent;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 
-public class MosCompositeFragment extends Fragment {
-    private static String TAG = "MosCompositeFragment";
+public class MosCompFragment extends Fragment {
+    private static String TAG = "MosCompFragment";
 
     private ViewPager mHorizontalPager;
     private int mCentralPageIndex = 0;
-    private class PageChangeListener implements OnPageChangeListener {
-        @Override
-        public void onPageSelected(int position) {
-            Log.d(TAG, "onPageSelected, position:" + position + ", mCentralPageIndex:" + mCentralPageIndex);
-            EventBus.getInstance().post(new PageChangedEvent(mCentralPageIndex == position));
-        }
-
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-        }
-    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View fragmentView = inflater.inflate(R.layout.fragment_mos_acomp, container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_mos_comp, container, false);
         mHorizontalPager = (ViewPager) fragmentView.findViewById(R.id.fragment_composite_mos_pager);
 
         initViews();
 
         return fragmentView;
-    }
+    };
 
     private void initViews() {
         populateHorizontalPager();
@@ -83,5 +68,21 @@ public class MosCompositeFragment extends Fragment {
     @Subscribe
     public void eventSwitchToPage(SwitchToPageEvent event) {
         mHorizontalPager.setCurrentItem(event.getPage());
+    }
+
+private class PageChangeListener implements OnPageChangeListener {
+        @Override
+        public void onPageSelected(int position) {
+            Log.d(TAG, "onPageSelected, position:" + position + ", mCentralPageIndex:" + mCentralPageIndex);
+            EventBus.getInstance().post(new HorizontalPagerSwitchedEvent(mCentralPageIndex == position));
+        }
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+        }
     }
 }

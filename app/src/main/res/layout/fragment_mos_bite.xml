@@ -12,93 +12,93 @@
     >
 
     <ImageView
-        android:id="@+id/hbutton"
+        android:id="@+id/head"
         android:clickable="true"
-        custom:layout_left="18"
-        custom:layout_width="70"
-        custom:layout_top="0"
         custom:layout_height="41"
+        custom:layout_left="18"
+        custom:layout_top="0"
+        custom:layout_width="70"
         />
 
     <ImageView
-        android:id="@+id/bbutton"
+        android:id="@+id/body"
         android:clickable="true"
-        custom:layout_left="26"
-        custom:layout_width="53"
-        custom:layout_top="41"
         custom:layout_height="35"
+        custom:layout_left="26"
+        custom:layout_top="41"
+        custom:layout_width="53"
         />
 
     <ImageView
-        android:id="@+id/rabutton"
+        android:id="@+id/rightarm"
         android:clickable="true"
+        custom:layout_height="23"
         custom:layout_left="5"
+        custom:layout_top="41"
         custom:layout_width="21"
-        custom:layout_top="41"
-        custom:layout_height="23"
         />
 
     <ImageView
-        android:id="@+id/rhbutton"
+        android:id="@+id/righthand"
         android:clickable="true"
+        custom:layout_height="13"
         custom:layout_left="0"
-        custom:layout_width="15"
         custom:layout_top="65"
-        custom:layout_height="13"
+        custom:layout_width="15"
         />
 
     <ImageView
-        android:id="@+id/rlbutton"
+        android:id="@+id/rightleg"
         android:clickable="true"
-        custom:layout_left="21"
-        custom:layout_width="27"
-        custom:layout_top="76"
         custom:layout_height="15"
-        />
-
-    <ImageView
-        android:id="@+id/rfbutton"
-        android:clickable="true"
         custom:layout_left="21"
+        custom:layout_top="76"
         custom:layout_width="27"
-        custom:layout_top="91"
-        custom:layout_height="10"
         />
 
     <ImageView
-        android:id="@+id/labutton"
+        android:id="@+id/rightfoot"
         android:clickable="true"
-        custom:layout_left="80"
-        custom:layout_width="20"
-        custom:layout_top="41"
+        custom:layout_height="10"
+        custom:layout_left="21"
+        custom:layout_top="91"
+        custom:layout_width="27"
+        />
+
+    <ImageView
+        android:id="@+id/leftarm"
+        android:clickable="true"
         custom:layout_height="23"
+        custom:layout_left="80"
+        custom:layout_top="41"
+        custom:layout_width="20"
         />
 
     <ImageView
-        android:id="@+id/lhbutton"
+        android:id="@+id/lefthand"
         android:clickable="true"
-        custom:layout_left="85"
-        custom:layout_width="15"
-        custom:layout_top="65"
         custom:layout_height="13"
+        custom:layout_left="85"
+        custom:layout_top="65"
+        custom:layout_width="15"
         />
 
     <ImageView
-        android:id="@+id/llbutton"
+        android:id="@+id/leftleg"
         android:clickable="true"
-        custom:layout_left="54"
-        custom:layout_width="27"
-        custom:layout_top="76"
         custom:layout_height="15"
+        custom:layout_left="54"
+        custom:layout_top="76"
+        custom:layout_width="27"
         />
 
     <ImageView
-        android:id="@+id/lfbutton"
+        android:id="@+id/leftfoot"
         android:clickable="true"
-        custom:layout_left="54"
-        custom:layout_width="27"
-        custom:layout_top="91"
         custom:layout_height="10"
+        custom:layout_left="54"
+        custom:layout_top="91"
+        custom:layout_width="27"
         />
 
 </com.manuelpeinado.imagelayout.ImageLayout>
