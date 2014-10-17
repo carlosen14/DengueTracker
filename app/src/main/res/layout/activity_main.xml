@@ -7,16 +7,16 @@
 
     <fragment
         android:id="@+id/main_mos_fragment"
+        class="com.netsdo.denguetracker.MosCompFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.netsdo.denguetracker.MosCompositeFragment"
-        tools:layout="@layout/fragment_mos_acomp" />
+        tools:layout="@layout/fragment_mos_comp" />
 
     <fragment
         android:id="@+id/main_temp_fragment"
+        class="com.netsdo.denguetracker.TempCompFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.netsdo.denguetracker.TempCompositeFragment"
-        tools:layout="@layout/fragment_temp_acomp" />
+        tools:layout="@layout/fragment_temp_comp" />
 
 </com.netsdo.swipe4d.VerticalPager>

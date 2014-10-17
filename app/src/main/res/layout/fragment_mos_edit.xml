@@ -6,17 +6,17 @@
 
     <Button
         android:id="@+id/delete"
-        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:clickable="true"
         android:hint="delete"/>
 
     <Button
         android:id="@+id/iwhere"
-        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_below="@+id/delete"
+        android:clickable="true"
         android:hint="iwhere"/>
 
 
@@ -32,7 +32,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start|center_vertical"
-            android:hint="1234" />
+            android:hint="1234"
+            android:textSize="20dp" />
 
         <com.antistatic.spinnerwheel.WheelVerticalView
             android:id="@+id/day"
@@ -46,21 +47,21 @@
 
         <com.antistatic.spinnerwheel.WheelVerticalView
             android:id="@+id/hour"
-            app:selectionDivider="@drawable/divider_dark_gradient_horizontal"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:layout_width="50dp" />
+            app:selectionDivider="@drawable/divider_dark_gradient_horizontal" />
 
         <com.antistatic.spinnerwheel.WheelVerticalView
             android:id="@+id/min"
-            app:selectionDivider="@drawable/divider_dark_gradient_horizontal"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:layout_width="50dp" />
+            app:selectionDivider="@drawable/divider_dark_gradient_horizontal" />
 
         <com.antistatic.spinnerwheel.WheelVerticalView
             android:id="@+id/iwhat"
-            app:selectionDivider="@drawable/divider_dark_gradient_horizontal"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:layout_width="150dp" />
+            app:selectionDivider="@drawable/divider_dark_gradient_horizontal" />
 
     </LinearLayout>
 </RelativeLayout>

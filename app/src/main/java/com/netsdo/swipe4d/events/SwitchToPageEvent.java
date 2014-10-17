@@ -1,4 +1,4 @@
-package com.netsdo.swipe4d;
+package com.netsdo.swipe4d.events;
 
 public class SwitchToPageEvent {
     private static String TAG = "SwitchToPageEvent";
