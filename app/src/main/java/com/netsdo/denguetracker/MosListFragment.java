@@ -201,7 +201,7 @@ public class MosListFragment extends Fragment {
             LayoutInflater lLayoutInflater;
             ViewHolder lViewHolder;
 
-            if (child == null) {
+            if (child == null) { 
                 lLayoutInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE); // must use getActivity
                 child = lLayoutInflater.inflate(R.layout.item_mos, null);
                 lViewHolder = new ViewHolder();
