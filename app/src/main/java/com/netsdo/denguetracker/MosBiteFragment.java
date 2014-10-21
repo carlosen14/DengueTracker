@@ -32,36 +32,38 @@ public class MosBiteFragment extends Fragment {
     private BestLocationProvider mBestLocationProvider;
     private BestLocationListener mBestLocationListener;
     private MainActivity mParentActivity;
-    private InfoHandler mInfoHandler;
+    private InfoDB mInfoDB;
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
-        View fragmentView = inflater.inflate(R.layout.fragment_mos_bite, container, false);
+        View lFragmentHolder = inflater.inflate(R.layout.fragment_mos_bite, container, false);
         mParentActivity = (MainActivity) getActivity();
-        mInfoHandler = mParentActivity.mInfoHandler;
+        mInfoDB = mParentActivity.mInfoDB;
 
-        ImageView hbutton = (ImageView) fragmentView.findViewById(R.id.head);
-        ImageView bbutton = (ImageView) fragmentView.findViewById(R.id.body);
-        ImageView rabutton = (ImageView) fragmentView.findViewById(R.id.rightarm);
-        ImageView rhbutton = (ImageView) fragmentView.findViewById(R.id.righthand);
-        ImageView rlbutton = (ImageView) fragmentView.findViewById(R.id.rightleg);
-        ImageView rfbutton = (ImageView) fragmentView.findViewById(R.id.rightfoot);
-        ImageView labutton = (ImageView) fragmentView.findViewById(R.id.leftarm);
-        ImageView lhbutton = (ImageView) fragmentView.findViewById(R.id.lefthand);
-        ImageView llbutton = (ImageView) fragmentView.findViewById(R.id.leftleg);
-        ImageView lfbutton = (ImageView) fragmentView.findViewById(R.id.leftfoot);
-        hbutton.setOnClickListener(new ClickListener());
-        bbutton.setOnClickListener(new ClickListener());
-        rabutton.setOnClickListener(new ClickListener());
-        rhbutton.setOnClickListener(new ClickListener());
-        rlbutton.setOnClickListener(new ClickListener());
-        rfbutton.setOnClickListener(new ClickListener());
-        labutton.setOnClickListener(new ClickListener());
-        lhbutton.setOnClickListener(new ClickListener());
-        llbutton.setOnClickListener(new ClickListener());
-        lfbutton.setOnClickListener(new ClickListener());
+        ImageView mheadHolder = (ImageView) lFragmentHolder.findViewById(R.id.head);
+        ImageView mbodyHolder = (ImageView) lFragmentHolder.findViewById(R.id.body);
+        ImageView mrightarmHolder = (ImageView) lFragmentHolder.findViewById(R.id.rightarm);
+        ImageView mrighthandHolder = (ImageView) lFragmentHolder.findViewById(R.id.righthand);
+        ImageView mrightlegHolder = (ImageView) lFragmentHolder.findViewById(R.id.rightleg);
+        ImageView mrightfootHolder = (ImageView) lFragmentHolder.findViewById(R.id.rightfoot);
+        ImageView mleftarmHolder = (ImageView) lFragmentHolder.findViewById(R.id.leftarm);
+        ImageView mlefthandHolder = (ImageView) lFragmentHolder.findViewById(R.id.lefthand);
+        ImageView mleftlegHolder = (ImageView) lFragmentHolder.findViewById(R.id.leftleg);
+        ImageView mleftfootHolder = (ImageView) lFragmentHolder.findViewById(R.id.leftfoot);
 
-        return fragmentView;
+        ClickListener lClickListener = new ClickListener();
+        mheadHolder.setOnClickListener(lClickListener);
+        mbodyHolder.setOnClickListener(lClickListener);
+        mrightarmHolder.setOnClickListener(lClickListener);
+        mrighthandHolder.setOnClickListener(lClickListener);
+        mrightlegHolder.setOnClickListener(lClickListener);
+        mrightfootHolder.setOnClickListener(lClickListener);
+        mleftarmHolder.setOnClickListener(lClickListener);
+        mlefthandHolder.setOnClickListener(lClickListener);
+        mleftlegHolder.setOnClickListener(lClickListener);
+        mleftfootHolder.setOnClickListener(lClickListener);
+
+        return lFragmentHolder;
     }
 
     @Override
@@ -87,12 +89,12 @@ public class MosBiteFragment extends Fragment {
     public void eventSwitched(VerticalPagerSwitchedEvent event) {
         Log.d(TAG, "evenSwitched");
         switch (event.isSwitched(VPOS)) {
-            case -1:
+            case VerticalPagerSwitchedEvent.INACTIVE:
                 onInActive();
                 break;
-            case 0:
+            case VerticalPagerSwitchedEvent.NOCHANGE:
                 break;
-            case 1:
+            case VerticalPagerSwitchedEvent.ACTIVE:
                 onActive();
                 break;
             default:
@@ -180,7 +182,7 @@ public class MosBiteFragment extends Fragment {
                     break;
                 case R.id.righthand:
                     lBiteOn = "RightHand";
-                    mInfoHandler.truncateInfo();  // for testing purpose, to be removed before final release.
+                    mInfoDB.truncateInfo();  // for testing purpose, to be removed before final release.
                     break;
                 case R.id.rightleg:
                     lBiteOn = "RightLeg";
@@ -199,17 +201,17 @@ public class MosBiteFragment extends Fragment {
                         lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info ORDER BY iwhen DESC;";
                         JSONObject lObj = new JSONObject();
                         lObj.put("sql", lSQL);
-                        lNoRec = mInfoHandler.openSelectInfo(lObj.toString());
+                        lNoRec = mInfoDB.openSelectInfo(lObj.toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Log.d(TAG, "openSelectInfo wrong.");
                         lNoRec = 0;
                     }
                     if (lNoRec != 0) {
-                        String lInfo = mInfoHandler.selectNextInfo();
+                        String lInfo = mInfoDB.selectNextInfo();
                         while (lInfo != null) {
                             Log.d(TAG, lInfo);
-                            lInfo = mInfoHandler.selectNextInfo();
+                            lInfo = mInfoDB.selectNextInfo();
                         }
                     } else {
                         Log.d(TAG, "no record of Info found.");
@@ -235,11 +237,14 @@ public class MosBiteFragment extends Fragment {
             lInfo.setiwhat(lBiteOn);
             String lsInfo = lInfo.getInfo();
             if (lsInfo == Info.NULLSTRING) {
+                Log.d(TAG, "ClickListener, Info parsing error.");
+
                 return;
             } else {
-                if (mInfoHandler.insertInfo(lsInfo) == 0) {
+                if (mInfoDB.insertInfo(lsInfo) == 0) {
                     Log.d(TAG, "ClickListener, no record lsInfo:" + lsInfo);
                 }
+                // data is inserted without error.
             }
         }
     }

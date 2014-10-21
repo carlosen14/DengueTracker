@@ -12,11 +12,9 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class InfoHandler {
-    private final static String TAG = "InfoHandler";
-
+public class InfoDB {
     public final static long NULLLONG = -1; //reserved for null value
-
+    private final static String TAG = "InfoDB";
     private Context mContext;
     private SQLiteDatabase mDB;
 
@@ -26,7 +24,7 @@ public class InfoHandler {
     private String mDateTime;
     private long mNoRec;
 
-    public InfoHandler(Context context) {
+    public InfoDB(Context context) {
         mContext = context;
 
         mDB = mContext.openOrCreateDatabase("InfoDB", Context.MODE_PRIVATE, null);
@@ -203,7 +201,7 @@ public class InfoHandler {
 
     public String selectInfo(String jSQL) {
         // assume the query includes all columns in original sequence. SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info;
-        Log.d(TAG, "selectInfo, JSON:" + jSQL);
+        Log.d(TAG, "selectInfo(jSQL), JSON:" + jSQL);
 
         Cursor lCursor;
         String lSQL;
@@ -217,7 +215,6 @@ public class InfoHandler {
             return null;
         }
 
-        Log.d(TAG, lSQL);
         lCursor = mDB.rawQuery(lSQL, null);
         lNoRec = lCursor.getCount();
         if (lNoRec == 0) {
@@ -232,7 +229,7 @@ public class InfoHandler {
                 lObj.put("sql", lSQL);
                 lObj.put("norec", lNoRec);
                 lObj.put("datetime", new SimpleDateFormat(mContext.getString(R.string.iso6301)).format(new Date()));
-                Log.d(TAG, "selectAllInfo(String), Partial JSON:" + lObj.toString());
+                Log.d(TAG, "selectInfo(jSQL), Partial JSON:" + lObj.toString());
                 while (lCursor.moveToNext()) {
                     JSONObject lInfoRec = new JSONObject();
                     lInfoRec.put("position", lCursor.getPosition());
@@ -247,7 +244,7 @@ public class InfoHandler {
                 }
                 lCursor.close();
                 lObj.put("info", lInfoObj);
-                Log.d(TAG, "selectAllInfo(String), Full JSON:" + lObj.toString());
+                Log.d(TAG, "selectInfo(jSQL), Full JSON:" + lObj.toString());
 
                 return lObj.toString();
             } catch (JSONException e) {

@@ -13,10 +13,12 @@ public class Info {
     public final static String NULLSTRING = "null"; // reserved to indicate null String, used for data output only.
     private String iwho = NULLSTRING;
     private String iwhen = NULLSTRING;
-    private String iwhere = NULLSTRING;
     private String ihow = NULLSTRING;
     private String iwhat = NULLSTRING;
     private String iwhy = NULLSTRING;
+    public final static String NULLWHERE = "{\"time\":\"2000-01-01T00:00:00.000+0000\",\"longitude\":0,\"latitude\":0,\"accuracy\":0,\"altitude\":0,\"speed\":0}"; // reserved to indicate null iwhere
+    private String iwhere = NULLWHERE;
+    public final static String NULLWHEN = "2000-01-01T00:00:00.000+0000"; // reserved to indicate null iwhen, used for data output only.
     public final static String iwhatListMosBite[] = {"Head", "Body", "RightArm", "RightHand", "RightLeg", "RightFoot", "LeftArm", "LeftHand", "LeftLeg", "LeftFoot"};
     public final static String ihowList[] = {"MosBite"};
     private static String TAG = "Info";
@@ -86,6 +88,7 @@ public class Info {
         // return original value
         return ihow;
     }
+
     public String getihow(String format) {
         // if format = 0, return direct translation without formatting
         // if format = other, return translation with format specified
@@ -102,6 +105,7 @@ public class Info {
         // return original value
         return iwhat;
     }
+
     public String getiwhat(String format) {
         // if format = 0, return direct translation without formatting
         // if format = other, return translation with format specified
@@ -113,22 +117,24 @@ public class Info {
             );
         }
     }
+
     public String[] getlistiwhat() {
         // return original value
         return iwhatListMosBite;
     }
+
     public String[] getlistiwhat(String format) {
         // if format = 0, return direct translation
         // if format = other, return translation with format specified
-        String [] lList = new String[iwhatListMosBite.length];
+        String[] lList = new String[iwhatListMosBite.length];
 
         if (format.equals("0")) {
-            for (int i = 0; i< iwhatListMosBite.length; i++) {
-                lList [i] = MainActivity.mStringDisplay.getDisplay(iwhatListMosBite[i]);
+            for (int i = 0; i < iwhatListMosBite.length; i++) {
+                lList[i] = MainActivity.mStringDisplay.getDisplay(iwhatListMosBite[i]);
             }
         } else {
-            for (int i = 0; i< iwhatListMosBite.length; i++) {
-                lList [i] = String.format(MainActivity.mStringDisplay.getDisplay(iwhatListMosBite[i]) + "-format" + format,
+            for (int i = 0; i < iwhatListMosBite.length; i++) {
+                lList[i] = String.format(MainActivity.mStringDisplay.getDisplay(iwhatListMosBite[i]) + "-format" + format,
                         iwhat //%1$s
                 );
             }
@@ -161,8 +167,8 @@ public class Info {
 
             rowid = NULLLONG;
             iwho = NULLSTRING;
-            iwhen = NULLSTRING;
-            iwhere = NULLSTRING;
+            iwhen = NULLWHEN;
+            iwhere = NULLWHERE;
             ihow = NULLSTRING;
             iwhat = NULLSTRING;
             iwhy = NULLSTRING;

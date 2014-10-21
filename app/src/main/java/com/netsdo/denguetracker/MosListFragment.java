@@ -27,28 +27,28 @@ public class MosListFragment extends Fragment {
     private static String TAG = "MosListFragment";
 
     private MainActivity mParentActivity;
-    private InfoHandler mInfoHandler;
+    private InfoDB mInfoDB;
 
     private MosListAdapter mAdapter;
     private ArrayList<Info> mInfoArray;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View lView = inflater.inflate(R.layout.fragment_mos_list, container, false);
-        ListView lList = (ListView) lView.findViewById(R.id.bite_list);
+        View lFragmentHolder = inflater.inflate(R.layout.fragment_mos_list, container, false);
+        ListView lListHolder = (ListView) lFragmentHolder.findViewById(R.id.bite_list);
 
         mParentActivity = (MainActivity) getActivity();
-        mInfoHandler = MainActivity.mInfoHandler;
+        mInfoDB = MainActivity.mInfoDB;
         mInfoArray = new ArrayList<Info>();
 
-        loadInfo(); // Info is loaded into mInfoArray
+        loadData(); // Info is loaded into mInfoArray
 
         mAdapter = new MosListAdapter(mInfoArray);
-        lList.setAdapter(mAdapter);
+        lListHolder.setAdapter(mAdapter);
 
-        lList.setOnItemClickListener(new ItemClickListener());
+        lListHolder.setOnItemClickListener(new ItemClickListener());
 
-        return lView;
+        return lFragmentHolder;
     }
 
     @Override
@@ -84,8 +84,8 @@ public class MosListFragment extends Fragment {
     public void onActive() {
         Log.d(TAG, "onActive");
 
-        if (loadInfo()) {
-            showInfo();
+        if (loadData()) {
+            showData();
         }
         EventBus.getInstance().post(new HorizontalPagerSwitchedEvent(false)); // shortcut to prevent vertical scroll if the fragment is not main page and active at beginning (onPageSelected is not called at this scenario). todo,
     }
@@ -94,7 +94,7 @@ public class MosListFragment extends Fragment {
         Log.d(TAG, "onInActive");
     }
 
-    private boolean loadInfo() {
+    private boolean loadData() {
         // return true if data is changes
         // return false if data is not changed.
         String lSQL;
@@ -110,14 +110,14 @@ public class MosListFragment extends Fragment {
             lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE ihow = 'MosBite' ORDER BY iwhen DESC;";
             JSONObject lObj = new JSONObject();
             lObj.put("sql", lSQL);
-            lInfo = mInfoHandler.selectInfo(lObj.toString());
+            lInfo = mInfoDB.selectInfo(lObj.toString());
             if (lInfo == null) {
-                return true; // no data found, data is changed
+                return false; // no data found, treat it as data is not changed
             }
         } catch (JSONException e) {
             e.printStackTrace();
 
-            return false; // error, consider data is not changed
+            return false; // error, treat it as data is not changed
         }
 
         try {
@@ -144,7 +144,7 @@ public class MosListFragment extends Fragment {
         return true; // data is changed.
     }
 
-    private boolean showInfo() {
+    private boolean showData() {
         mAdapter.notifyDataSetChanged(); // refresh screen after new data is loaded.
         EventBus.getInstance().post(new MosEditEvent(mInfoArray.get(0).getrowid())); // hardcode to pass first record to edit page to load as default, todo
 
@@ -201,7 +201,7 @@ public class MosListFragment extends Fragment {
             LayoutInflater lLayoutInflater;
             ViewHolder lViewHolder;
 
-            if (child == null) { 
+            if (child == null) {
                 lLayoutInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE); // must use getActivity
                 child = lLayoutInflater.inflate(R.layout.item_mos, null);
                 lViewHolder = new ViewHolder();

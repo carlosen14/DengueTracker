@@ -68,6 +68,10 @@ public class StringDisplay {
             mJSONData.put("LeftLeg-format1-" + mAppLocale.toString(), "8");
             mJSONData.put("LeftFoot-format1-" + mAppLocale.toString(), "9");
 
+            mJSONData.put("TempUnit-" + mAppLocale.toString(), "F");
+            mJSONData.put("TempUnit-" + Locale.CHINESE.toString(), "C");
+
+
             // general string
             mJSONData.put("When-" + mAppLocale.toString(), "When: ");
             mJSONData.put("When-" + Locale.CHINESE.toString(), "时间");

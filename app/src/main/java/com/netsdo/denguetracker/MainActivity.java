@@ -18,7 +18,7 @@ public class MainActivity extends FragmentActivity {
 
     private final static int START_PAGE_INDEX = 0;
 
-    public static InfoHandler mInfoHandler;
+    public static InfoDB mInfoDB;
 
     public static StringDisplay mStringDisplay;
 
@@ -30,7 +30,7 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
         mVerticalPager = (VerticalPager) findViewById(R.id.activity_main_vertical_pager);
 
-        mInfoHandler = new InfoHandler(this);
+        mInfoDB = new InfoDB(this);
         mStringDisplay = new StringDisplay();
         mStringDisplay.setLocale(Locale.CHINESE);
 
