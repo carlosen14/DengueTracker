@@ -2,31 +2,42 @@ package com.netsdo.denguetracker;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
+import com.androidplot.Plot;
+import com.androidplot.ui.SizeLayoutType;
+import com.androidplot.ui.SizeMetrics;
+import com.androidplot.xy.BoundaryMode;
+import com.androidplot.xy.LineAndPointFormatter;
+import com.androidplot.xy.SimpleXYSeries;
+import com.androidplot.xy.XYPlot;
+import com.androidplot.xy.XYStepMode;
 import com.netsdo.Temperature;
+import com.netsdo.gattsensor.OnObjectTemperatureListener;
 import com.netsdo.swipe4d.EventBus;
 import com.netsdo.swipe4d.events.VerticalPagerSwitchedEvent;
 import com.squareup.otto.Subscribe;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class TempRecFragment extends Fragment {
     private final static String TAG = "TempRecFragment";
@@ -36,26 +47,29 @@ public class TempRecFragment extends Fragment {
     private MainActivity mParentActivity;
     private InfoDB mInfoDB;
 
-    private TempListAdapter mAdapter;
-    private ArrayList<Info> mInfoArray;
-
-    private ListView mtemplistHolder;
     private TextView mtempsaveHolder;
     private SeekBar mtemppickerHolder;
     private TextView mtempHolder;
-    private Switch mtempalertswitchHolder;
+    private ToggleButton mtempalertswitchHolder;
     private SeekBar mtempalertpickerHolder;
     private TextView mtempalerttimeHolder;
     private TextView mmedisaveHolder;
     private Spinner mmedipickerHolder;
     private Spinner mmediqtypickerHolder;
-    private Switch mmedialertswitchHolder;
+    private ToggleButton mmedialertswitchHolder;
     private SeekBar mmedialertpickerHolder;
     private TextView mmedialerttimeHolder;
 
     private long mTemp;
     private Date mNextTempAlert;
     private Date mNextMediAlert;
+
+    // graph
+    private XYPlot plot;
+    private SimpleXYSeries sensorValueHistorySeries;
+
+    private Double maxAddedValue = null;
+    private Double minAddedValue = null;
 
     public TempRecFragment() {
         Log.d(TAG, "Constructor");
@@ -77,86 +91,62 @@ public class TempRecFragment extends Fragment {
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
+        View fragmentView = inflater.inflate(R.layout.fragment_temp_rec, container, false);
+        mParentActivity = (MainActivity) getActivity();
+        mInfoDB = mParentActivity.mInfoDB;
+
+        configureGraph(fragmentView);
+        addDataFromHistory();
+
+        loadData(); // Info is loaded into mInfoArray
+
+        mtempsaveHolder = (TextView) fragmentView.findViewById(R.id.temp_save);
+        mtemppickerHolder = (SeekBar) fragmentView.findViewById(R.id.temp_picker);
+        mtempHolder = (TextView) fragmentView.findViewById(R.id.temp);
+        mtempalertswitchHolder = (ToggleButton) fragmentView.findViewById(R.id.temp_alert_switch);
+        mtempalertpickerHolder = (SeekBar) fragmentView.findViewById(R.id.temp_alert_picker);
+        mtempalerttimeHolder = (TextView) fragmentView.findViewById(R.id.temp_alert_time);
+        mmedisaveHolder = (TextView) fragmentView.findViewById(R.id.medi_save);
+        mmedipickerHolder = (Spinner) fragmentView.findViewById(R.id.medi_picker);
+        mmediqtypickerHolder = (Spinner) fragmentView.findViewById(R.id.medi_qty_picker);
+        mmedialertswitchHolder = (ToggleButton) fragmentView.findViewById(R.id.medi_alert_switch);
+        mmedialertpickerHolder = (SeekBar) fragmentView.findViewById(R.id.medi_alert_picker);
+        mmedialerttimeHolder = (TextView) fragmentView.findViewById(R.id.medi_alert_time);
+
+        mtemppickerHolder.setOnSeekBarChangeListener(new SeekBarChangeListener());
+        mtemppickerHolder.setMax((int) (Temperature.HUMAN_MAX - Temperature.HUMAN_MIN) * 10); // set value between min and max of human temperature, use 1 decimal.
+        mtempsaveHolder.setOnClickListener(new ClickListener());
+        mmedisaveHolder.setOnClickListener(new ClickListener());
+
+        ((MainActivity) getActivity()).addObjectTemperatureListener(new ObjectTemperatureListener());
+
+        return fragmentView;
+    }
+
+    @Override
+    public void onViewCreated(android.view.View view, @android.support.annotation.Nullable android.os.Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG, "onViewCreated");
+    }
+
+    @Override
     public void onActivityCreated(Bundle saved) {
         super.onActivityCreated(saved);
         Log.d(TAG, "onActivityCreated");
     }
 
     @Override
+    public void onViewStateRestored(@android.support.annotation.Nullable android.os.Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        Log.d(TAG, "onViewStateRestored");
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart");
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        Log.d(TAG, "onDetach");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.d(TAG, "onDestroyView");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop");
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle toSave) {
-        super.onSaveInstanceState(toSave);
-        Log.d(TAG, "onSaveinstanceState");
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        Log.d(TAG, "onHiddenChanged, HIDDEN:" + hidden);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView");
-        View fragmentView = inflater.inflate(R.layout.fragment_temp_rec, container, false);
-        mParentActivity = (MainActivity) getActivity();
-        mInfoDB = mParentActivity.mInfoDB;
-        mInfoArray = new ArrayList<Info>();
-
-        loadData(); // Info is loaded into mInfoArray
-
-        mAdapter = new TempListAdapter(mInfoArray);
-        mtemplistHolder = (ListView) fragmentView.findViewById(R.id.temp_list);
-        mtemplistHolder.setAdapter(mAdapter);
-
-        mtempsaveHolder = (TextView) fragmentView.findViewById(R.id.tempsave);
-        mtemppickerHolder = (SeekBar) fragmentView.findViewById(R.id.temppicker);
-        mtempHolder = (TextView) fragmentView.findViewById(R.id.temp);
-        mtempalertswitchHolder = (Switch) fragmentView.findViewById(R.id.tempalertswitch);
-        mtempalertpickerHolder = (SeekBar) fragmentView.findViewById(R.id.tempalertpicker);
-        mtempalerttimeHolder = (TextView) fragmentView.findViewById(R.id.tempalerttime);
-        mmedisaveHolder = (TextView) fragmentView.findViewById(R.id.medisave);
-        mmedipickerHolder = (Spinner) fragmentView.findViewById(R.id.medipicker);
-        mmediqtypickerHolder = (Spinner) fragmentView.findViewById(R.id.mediqtypicker);
-        mmedialertswitchHolder = (Switch) fragmentView.findViewById(R.id.medialertswitch);
-        mmedialertpickerHolder = (SeekBar) fragmentView.findViewById(R.id.medialertpicker);
-        mmedialerttimeHolder = (TextView) fragmentView.findViewById(R.id.medialerttime);
-
-        mtemppickerHolder.setOnSeekBarChangeListener(new SeekBarChangeListener());
-        mtemppickerHolder.setMax((int)(Temperature.HUMAN_MAX - Temperature.HUMAN_MIN ) * 10); // set value between min and max of human temperature, use 1 decimal.
-        mtempsaveHolder.setOnClickListener(new ClickListener());
-        mmedisaveHolder.setOnClickListener(new ClickListener());
-
-        return fragmentView;
     }
 
     @Override
@@ -178,6 +168,55 @@ public class TempRecFragment extends Fragment {
         super.onPause();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle toSave) {
+        super.onSaveInstanceState(toSave);
+        Log.d(TAG, "onSaveInstanceState");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "onDestroyView");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(TAG, "onDetach");
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        Log.d(TAG, "onHiddenChanged, HIDDEN:" + hidden);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (isVisibleToUser) {
+            Log.d(TAG, "setUserVisibleHint, True");
+            onActive();
+        } else {
+            Log.d(TAG, "setUserVisibleHint, False");
+            onInActive();
+        }
+    }
+
     @Subscribe
     public void eventSwitched(VerticalPagerSwitchedEvent event) {
         Log.d(TAG, "evenSwitched");
@@ -195,19 +234,6 @@ public class TempRecFragment extends Fragment {
         }
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-
-        if (isVisibleToUser) {
-            Log.d(TAG, "setUserVisibleHint, True");
-            onActive();
-        } else {
-            Log.d(TAG, "setUserVisibleHint, False");
-            onInActive();
-        }
-    }
-
     public void onActive() {
         Log.d(TAG, "onActive");
     }
@@ -221,144 +247,110 @@ public class TempRecFragment extends Fragment {
     }
 
     public boolean loadData() {
-        Log.d(TAG, "loadData");
-        String lSQL;
-        String lInfo;
-
-        if (mInfoArray == null) {
-            return false; // no data
-        }
-
-        mInfoArray.clear();
-
-        try {
-            lSQL = "SELECT rowid, iwho, iwhen, iwhere, ihow, iwhat, iwhy FROM Info WHERE ihow = 'TempRec' OR ihow = 'MediTake' ORDER BY iwhen DESC;";
-            JSONObject lObj = new JSONObject();
-            lObj.put("sql", lSQL);
-            lInfo = mInfoDB.selectInfo(lObj.toString());
-            if (lInfo == null) {
-                return false; // no data found, treat it as data is no change
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return false; // error, treat it as data is no change
-        }
-
-        try {
-            JSONObject lObj = new JSONObject(lInfo);
-            long lNoRec = lObj.getLong("norec");
-            JSONArray lInfoObj = lObj.getJSONArray("info");
-            for (int i = 0; i < lNoRec; i++) {
-                JSONObject lInfoRec = lInfoObj.getJSONObject(i);
-                JSONArray lsInfo = new JSONArray();
-                JSONObject lsObj = new JSONObject();
-                lsInfo.put(lInfoRec);
-                lsObj.put("info", lsInfo);
-                Info lcInfo = new Info();
-                if (lcInfo.setInfo(lsObj.toString())) {//reconstruct a record in JSON and assign it to array
-                    mInfoArray.add(lcInfo);
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return false; // error, consider data is not changed.
-        }
-
         return true;
     }
 
-    public boolean showData() {
-        Log.d(TAG, "showData");
-
-        mAdapter.notifyDataSetChanged();
-        return true;
+    public void showData() {
+        return;
     }
 
-    public class TempListAdapter extends BaseAdapter {
+    private void configureGraph(View fragmentView) {
+        plot = (XYPlot) fragmentView.findViewById(R.id.temp_plot);
+        plot.setDomainLabel("");
+        plot.setRangeLabel("");
 
-        private ArrayList<Info> mmInfoArray;
+        plot.setDomainValueFormat(new TimeLabelFormat());
 
-        public TempListAdapter(ArrayList<Info> InfoArray) {
-            mmInfoArray = InfoArray;
+        sensorValueHistorySeries = new SimpleXYSeries("SensorValue");
+
+        LineAndPointFormatter lineAndPointFormatter = new LineAndPointFormatter(Color.BLACK, Color.TRANSPARENT, Color.TRANSPARENT, null);
+        Paint paint = lineAndPointFormatter.getLinePaint();
+        paint.setStrokeWidth(8);
+        lineAndPointFormatter.setLinePaint(paint);
+        plot.addSeries(sensorValueHistorySeries, lineAndPointFormatter);
+
+        plot.getGraphWidget().setDomainLabelOrientation(-90);
+        plot.getGraphWidget().setDomainLabelVerticalOffset(-35);
+        plot.getGraphWidget().getDomainLabelPaint().setTextAlign(Paint.Align.RIGHT);
+
+        plot.setBorderStyle(Plot.BorderStyle.NONE, null, null);
+
+        plot.setDomainStep(XYStepMode.SUBDIVIDE, 15);
+
+        // Colors
+        plot.getGraphWidget().getBackgroundPaint().setColor(Color.WHITE);
+        plot.getGraphWidget().getGridBackgroundPaint().setColor(Color.WHITE);
+        plot.getGraphWidget().getDomainLabelPaint().setColor(Color.BLACK);
+        plot.getGraphWidget().getRangeLabelPaint().setColor(Color.BLACK);
+        plot.getGraphWidget().getDomainOriginLabelPaint().setColor(Color.BLACK);
+        plot.getGraphWidget().getDomainOriginLinePaint().setColor(Color.BLACK);
+        plot.getGraphWidget().getRangeOriginLinePaint().setColor(Color.BLACK);
+
+        // Remove legend
+        plot.getLayoutManager().remove(plot.getLegendWidget());
+        plot.getLayoutManager().remove(plot.getDomainLabelWidget());
+        plot.getLayoutManager().remove(plot.getRangeLabelWidget());
+        plot.getLayoutManager().remove(plot.getTitleWidget());
+
+        plot.getGraphWidget().setSize(new SizeMetrics(
+                0, SizeLayoutType.FILL,
+                0, SizeLayoutType.FILL));
+    }
+
+    private void addDataFromHistory() {
+        List<SensorValueHistoryItem> history = getHistoryItems();
+        for (SensorValueHistoryItem item : history) {
+            addToGraph(item.getTimestamp(), item.getSensorValue());
         }
+    }
 
-        public ArrayList<Info> getData() {
-            return mmInfoArray;
+    protected List<SensorValueHistoryItem> getHistoryItems() {
+        ObjectTemperatureHistory historyStore = new ObjectTemperatureHistory();
+        return historyStore.getAll(getActivity());
+    }
+
+    protected void addToGraph(long timestamp, Double value) {
+
+        if (plot != null && value != null) {
+            double roundedValue = Temperature.round(value);
+
+            sensorValueHistorySeries.addLast(timestamp, Temperature.round(roundedValue));
+
+            updateMinMaxValues(roundedValue);
+            setBoundaries();
+            setRangeScale();
+
+            plot.redraw();
         }
+    }
 
-        public int getCount() {
-            if (mmInfoArray == null) {
-                return 0;
-            } else {
-                return mmInfoArray.size();
-            }
+    private void updateMinMaxValues(double roundedValue) {
+        if (maxAddedValue == null || roundedValue > maxAddedValue) {
+            maxAddedValue = roundedValue;
         }
-
-        public Object getItem(int position) {
-            if (mmInfoArray == null) {
-                return null;
-            } else {
-                return mmInfoArray.get(position);
-            }
+        if (minAddedValue == null || roundedValue < minAddedValue) {
+            minAddedValue = roundedValue;
         }
+    }
 
-        public long getItemId(int position) { // key of list item
-            if (mmInfoArray == null) {
-                return 0;
-            } else {
-                return mmInfoArray.get(position).getrowid();
-            }
+    ;
+
+    private void setBoundaries() {
+        if (minAddedValue.doubleValue() == maxAddedValue.doubleValue()) {
+            plot.setRangeBoundaries(minAddedValue - 0.1, maxAddedValue + 0.1, BoundaryMode.FIXED);
+        } else {
+            plot.setRangeBoundaries(minAddedValue, maxAddedValue, BoundaryMode.AUTO);
         }
+    }
 
-        public View getView(int position, View child, ViewGroup parent) {
-            LayoutInflater lLayoutInflater;
-            ViewHolder lViewHolder;
-
-            if (child == null) {
-                lLayoutInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE); // must use getActivity
-                child = lLayoutInflater.inflate(R.layout.item_mos, null);
-                lViewHolder = new ViewHolder();
-                lViewHolder.rowid = (TextView) child.findViewById(R.id.rowid);
-                lViewHolder.iwho = (TextView) child.findViewById(R.id.iwho);
-                lViewHolder.iwhen = (TextView) child.findViewById(R.id.iwhen);
-                lViewHolder.iwhere = (TextView) child.findViewById(R.id.iwhere);
-                lViewHolder.ihow = (TextView) child.findViewById(R.id.ihow);
-                lViewHolder.iwhat = (TextView) child.findViewById(R.id.iwhat);
-                lViewHolder.iwhy = (TextView) child.findViewById(R.id.iwhy);
-                lViewHolder.label_iwhen = (TextView) child.findViewById(R.id.label_iwhen);
-                lViewHolder.label_iwhere = (TextView) child.findViewById(R.id.label_iwhere);
-                child.setTag(lViewHolder);
-            } else {
-                lViewHolder = (ViewHolder) child.getTag();
-            }
-
-            if (mmInfoArray != null) {
-                lViewHolder.rowid.setText(String.format("%d", mmInfoArray.get(position).getrowid()));
-                lViewHolder.iwho.setText(""); // not display iwho
-                lViewHolder.iwhen.setText(mmInfoArray.get(position).getiwhen());
-                lViewHolder.iwhere.setText(""); // not display iwhere
-                lViewHolder.ihow.setText(mmInfoArray.get(position).getihow("0"));
-                lViewHolder.iwhat.setText(mmInfoArray.get(position).getiwhat("0"));
-                lViewHolder.iwhy.setText(""); // not display iwhy
-                lViewHolder.label_iwhen.setText(MainActivity.mStringDisplay.getDisplay("When")); // display when label
-                lViewHolder.label_iwhere.setText(MainActivity.mStringDisplay.getDisplay("Where")); // display where label
-            }
-
-            return child;
-        }
-
-        public class ViewHolder {
-            TextView rowid;
-            TextView iwho;
-            TextView iwhen;
-            TextView iwhere;
-            TextView ihow;
-            TextView iwhat;
-            TextView iwhy;
-            TextView label_iwhen;
-            TextView label_iwhere;
+    private void setRangeScale() {
+        double difference = maxAddedValue.doubleValue() - minAddedValue.doubleValue();
+        if (difference == 0 || difference <= 1.0) {
+            plot.setRangeStep(XYStepMode.INCREMENT_BY_VAL, 0.1);
+        } else {
+            double step = difference / 14;
+            double roundedStep = new BigDecimal(step).setScale(1, RoundingMode.HALF_UP).doubleValue();
+            plot.setRangeStep(XYStepMode.INCREMENT_BY_VAL, roundedStep);
         }
     }
 
@@ -368,11 +360,11 @@ public class TempRecFragment extends Fragment {
             String lihow;
             String liwhat;
             switch (v.getId()) {
-                case R.id.tempsave:
+                case R.id.temp_save:
                     lihow = "TempRec";
                     liwhat = Temperature.toString(mtemppickerHolder.getProgress() / 10 + Temperature.HUMAN_MIN);
                     break;
-                case R.id.medisave:
+                case R.id.medi_save:
                     lihow = "MediTake";
                     liwhat = "MediA";
                     break;
@@ -416,4 +408,123 @@ public class TempRecFragment extends Fragment {
             mtempHolder.setText(Temperature.toString(mtemppickerHolder.getProgress() / 10 + Temperature.HUMAN_MIN));
         }
     }
+
+    private final class TimeLabelFormat extends Format {
+        private static final long serialVersionUID = 2204112458107503528L;
+
+        private final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+
+        @Override
+        public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+            long timestamp = ((Number) obj).longValue();
+            Date date = new Date(timestamp);
+            return dateFormat.format(date, toAppendTo, pos);
+        }
+
+        @Override
+        public Object parseObject(String source, ParsePosition pos) {
+            return null;
+        }
+    }
+
+    public class ObjectTemperatureListener implements OnObjectTemperatureListener {
+        @Override
+        public void onObjectTemperatureUpdate(Context context, Double updatedTemperature) {
+            addToGraph(System.currentTimeMillis(), updatedTemperature);
+        }
+    }
+/*
+    // Definition of the touch states
+    static final int NONE = 0;
+    static final int ONE_FINGER_DRAG = 1;
+    static final int TWO_FINGERS_DRAG = 2;
+    int mode = NONE;
+
+    PointF firstFinger;
+    float distBetweenFingers;
+    boolean stopThread = false;
+
+    public class TouchLIstener implements View.OnTouchListener {
+        public boolean onTouch(View arg0, MotionEvent event) {
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN: // Start gesture
+                    firstFinger = new PointF(event.getX(), event.getY());
+                    mode = ONE_FINGER_DRAG;
+                    stopThread = true;
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_POINTER_UP:
+                    mode = NONE;
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN: // second finger
+                    distBetweenFingers = spacing(event);
+                    // the distance check is done to avoid false alarms
+                    if (distBetweenFingers > 5f) {
+                        mode = TWO_FINGERS_DRAG;
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (mode == ONE_FINGER_DRAG) {
+                        PointF oldFirstFinger = firstFinger;
+                        firstFinger = new PointF(event.getX(), event.getY());
+                        scroll(oldFirstFinger.x - firstFinger.x);
+                        mySimpleXYPlot.setDomainBoundaries(minXY.x, maxXY.x,
+                                BoundaryMode.FIXED);
+                        mySimpleXYPlot.redraw();
+
+                    } else if (mode == TWO_FINGERS_DRAG) {
+                        float oldDist = distBetweenFingers;
+                        distBetweenFingers = spacing(event);
+                        zoom(oldDist / distBetweenFingers);
+                        mySimpleXYPlot.setDomainBoundaries(minXY.x, maxXY.x,
+                                BoundaryMode.FIXED);
+                        mySimpleXYPlot.redraw();
+                    }
+                    break;
+            }
+            return true;
+        }
+        private void zoom(float scale) {
+            float domainSpan = maxXY.x - minXY.x;
+            float domainMidPoint = maxXY.x - domainSpan / 2.0f;
+            float offset = domainSpan * scale / 2.0f;
+
+            minXY.x = domainMidPoint - offset;
+            maxXY.x = domainMidPoint + offset;
+
+            minXY.x = Math.min(minXY.x, series[3].getX(series[3].size() - 3)
+                    .floatValue());
+            maxXY.x = Math.max(maxXY.x, series[0].getX(1).floatValue());
+            clampToDomainBounds(domainSpan);
+        }
+
+        private void scroll(float pan) {
+            float domainSpan = maxXY.x - minXY.x;
+            float step = domainSpan / mySimpleXYPlot.getWidth();
+            float offset = pan * step;
+            minXY.x = minXY.x + offset;
+            maxXY.x = maxXY.x + offset;
+            clampToDomainBounds(domainSpan);
+        }
+
+        private void clampToDomainBounds(float domainSpan) {
+            float leftBoundary = series[0].getX(0).floatValue();
+            float rightBoundary = series[3].getX(series[3].size() - 1).floatValue();
+            // enforce left scroll boundary:
+            if (minXY.x < leftBoundary) {
+                minXY.x = leftBoundary;
+                maxXY.x = leftBoundary + domainSpan;
+            } else if (maxXY.x > series[3].getX(series[3].size() - 1).floatValue()) {
+                maxXY.x = rightBoundary;
+                minXY.x = rightBoundary - domainSpan;
+            }
+        }
+
+        private float spacing(MotionEvent event) {
+            float x = event.getX(0) - event.getX(1);
+            float y = event.getY(0) - event.getY(1);
+            return FloatMath.sqrt(x * x + y * y);
+        }
+    }
+    */
 }

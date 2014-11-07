@@ -169,32 +169,32 @@ public class MosBiteFragment extends Fragment {
     private class ClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            String lBiteOn;
+            String liwhat;
             switch (v.getId()) {
                 case R.id.head:
-                    lBiteOn = "Head";
+                    liwhat = "Head";
                     break;
                 case R.id.body:
-                    lBiteOn = "Body";
+                    liwhat = "Body";
                     break;
                 case R.id.rightarm:
-                    lBiteOn = "RightArm";
+                    liwhat = "RightArm";
                     break;
                 case R.id.righthand:
-                    lBiteOn = "RightHand";
+                    liwhat = "RightHand";
                     mInfoDB.truncateInfo();  // for testing purpose, to be removed before final release.
                     break;
                 case R.id.rightleg:
-                    lBiteOn = "RightLeg";
+                    liwhat = "RightLeg";
                     break;
                 case R.id.rightfoot:
-                    lBiteOn = "RightFoot";
+                    liwhat = "RightFoot";
                     break;
                 case R.id.leftarm:
-                    lBiteOn = "LeftArm";
+                    liwhat = "LeftArm";
                     break;
                 case R.id.lefthand:
-                    lBiteOn = "LeftHand";
+                    liwhat = "LeftHand";
                     String lSQL;// for testing purpose, to be removed before final release.
                     long lNoRec;
                     try {
@@ -218,23 +218,23 @@ public class MosBiteFragment extends Fragment {
                     }
                     break;
                 case R.id.leftleg:
-                    lBiteOn = "LeftLeg";
+                    liwhat = "LeftLeg";
                     break;
                 case R.id.leftfoot:
-                    lBiteOn = "LeftFoot";
+                    liwhat = "LeftFoot";
                     break;
                 default:
-                    lBiteOn = "Unknown";
+                    liwhat = "Unknown";
             }
-            Toast.makeText(v.getContext(), "Mosquito Bite On " + lBiteOn, Toast.LENGTH_SHORT).show();
-            Log.i(TAG, lBiteOn + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
+            Toast.makeText(v.getContext(), MainActivity.mStringDisplay.getDisplay(mihow) + MainActivity.mStringDisplay.getDisplay(liwhat), Toast.LENGTH_SHORT).show();
+            Log.i(TAG, liwhat + " - " + mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
 
             Info lInfo = new Info();
             lInfo.setrowid(Info.ZEROLONG);
             lInfo.setiwhen(new SimpleDateFormat(getString(R.string.iso6301)).format(new Date()));
             lInfo.setiwhere(mBestLocationProvider.locationToString(mBestLocationProvider.getLocation()));
             lInfo.setihow(mihow);
-            lInfo.setiwhat(lBiteOn);
+            lInfo.setiwhat(liwhat);
             String lsInfo = lInfo.getInfo();
             if (lsInfo == Info.NULLSTRING) {
                 Log.d(TAG, "ClickListener, Info parsing error.");

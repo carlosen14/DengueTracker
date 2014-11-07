@@ -2,6 +2,9 @@ package com.netsdo;
 
 import com.netsdo.denguetracker.MainActivity;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class Temperature {
     public final static float HUMAN_MAX = 45;
     public final static float HUMAN_MIN = 30;
@@ -34,6 +37,10 @@ public class Temperature {
         } else {
             return String.format("%.2f C", celsius); // use Celsius as default unit
         }
+    }
+
+    public static double round(double value) {
+        return new BigDecimal(value).setScale(1, RoundingMode.HALF_UP).doubleValue();
     }
 
     public String toString() {
